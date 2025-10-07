@@ -1,3 +1,4 @@
+cat > public/index.html << 'EOF'
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,33 +11,534 @@
     <script>
         const stripe = Stripe(pk_live_51RIEWqENa3zBKoIjohkMbyimhQ4wDIIhBXu9AbUlGQFlD9NPXkwMBG6CdHpMPFfhWzstc9eb0Ew8WF39ddNJqLkc00ApVBESbd);
         const elements = stripe.elements();
-        const API_BASE_URL = 'https://us-central1-sports-dugout-contest.cloudfunctions.net/api';
+        
+        // API URL for your Vercel deployment
+        const API_BASE_URL = window.location.origin + '/api';
     </script>
+    <style>
+        .hero-gradient { background: linear-gradient(135deg, #1a202c 0%, #2d3748 25%, #4a5568 75%, #718096 100%); }
+        .pulse-gold { animation: pulse-gold 2s ease-in-out infinite; }
+        @keyframes pulse-gold { 0%, 100% { box-shadow: 0 0 20px #FFD700; } 50% { box-shadow: 0 0 40px #FFD700, 0 0 60px #FFA500; } }
+        .money-glow { animation: money-glow 3s ease-in-out infinite alternate; }
+        @keyframes money-glow { from { box-shadow: 0 0 30px #10B981, 0 0 60px #059669; } to { box-shadow: 0 0 50px #10B981, 0 0 100px #059669; } }
+        .feature-card { transition: all 0.3s ease; }
+        .feature-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+    </style>
 </head>
-<body class="bg-gray-900 text-white min-h-screen flex items-center justify-center">
-    <div class="text-center max-w-4xl mx-auto p-8">
-        <div class="w-32 h-32 mx-auto mb-6 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
-            <i class="fas fa-baseball-ball text-4xl text-white"></i>
+<body class="bg-gray-900 text-white">
+    <!-- Contest Header -->
+    <div class="bg-gradient-to-r from-green-500 to-emerald-600 text-white text-center py-3 font-bold text-lg pulse-gold">
+        💰 $1,000 CASH CONTEST - First to 1,000 Paying Referrals Wins! 💰
+    </div>
+
+    <!-- Navigation -->
+    <nav class="bg-gray-900/90 border-b border-gray-700 sticky top-0 z-40">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-baseball-ball text-white"></i>
+                    </div>
+                    <div class="font-black text-xl text-yellow-400">THE SPORTS DUGOUT</div>
+                </div>
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="#contest" class="hover:text-yellow-400 transition-colors">Contest</a>
+                    <a href="#features" class="hover:text-yellow-400 transition-colors">Features</a>
+                    <button id="mainJoinBtn" class="bg-yellow-500 hover:bg-yellow-400 text-black px-4 py-2 rounded-lg font-bold transition-colors">
+                        JOIN NOW
+                    </button>
+                </div>
+            </div>
         </div>
-        
-        <h1 class="text-5xl md:text-7xl font-black mb-4">
-            <span class="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">THE SPORTS</span><br>
-            <span class="bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">DUGOUT</span>
-        </h1>
-        
-        <h2 class="text-2xl md:text-4xl font-bold mb-6 text-gray-300">$1,000 Cash Contest</h2>
-        
-        <div class="bg-gradient-to-r from-green-500/20 to-emerald-600/20 backdrop-blur-lg rounded-2xl p-8 border-2 border-green-400">
-            <div class="text-6xl mb-4">💵</div>
-            <h3 class="text-4xl font-black text-green-400 mb-2">$1,000 CASH PRIZE</h3>
-            <p class="text-xl text-gray-300 mb-4">First person to get 1,000 valid paying referrals wins cold hard cash!</p>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="hero" class="hero-gradient min-h-screen flex items-center justify-center relative overflow-hidden">
+        <div class="absolute inset-0 bg-black/50"></div>
+        <div class="container mx-auto px-4 text-center relative z-10">
+            <div class="mb-8">
+                <div class="w-32 h-32 mx-auto mb-6 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center pulse-gold">
+                    <i class="fas fa-baseball-ball text-4xl text-white"></i>
+                </div>
+                <h1 class="text-5xl md:text-7xl font-black mb-4">
+                    <span class="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">THE SPORTS</span><br>
+                    <span class="bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">DUGOUT</span>
+                </h1>
+                <h2 class="text-2xl md:text-4xl font-bold mb-6 text-gray-300">The Future of Sports Betting is Here</h2>
+                <p class="text-xl md:text-2xl mb-8 max-w-3xl mx-auto text-gray-400">Revolutionary crypto-powered sports betting platform with AI predictions, live streaming, and the most advanced features ever built.</p>
+            </div>
+
+            <!-- Contest Highlight -->
+            <div class="max-w-lg mx-auto bg-gradient-to-r from-green-500/20 to-emerald-600/20 backdrop-blur-lg rounded-2xl p-8 mb-8 border-2 border-green-400 money-glow">
+                <div class="text-6xl mb-4">💵</div>
+                <h3 class="text-4xl font-black text-green-400 mb-2">$1,000 CASH PRIZE</h3>
+                <p class="text-xl text-gray-300 mb-4">First person to get 1,000 valid paying referrals wins cold hard cash!</p>
+                
+                <div class="bg-gray-800/50 rounded-lg p-4 mb-4">
+                    <div class="text-sm text-gray-400 mb-3">Contest Rules:</div>
+                    <ul class="text-sm text-gray-300 text-left space-y-2">
+                        <li class="flex items-start"><span class="text-green-400 mr-2">✅</span>Sign up for free</li>
+                        <li class="flex items-start"><span class="text-green-400 mr-2">✅</span><strong class="text-yellow-400">Make $10 deposit to qualify</strong></li>
+                        <li class="flex items-start"><span class="text-green-400 mr-2">✅</span>Get referral link & start sharing</li>
+                        <li class="flex items-start"><span class="text-green-400 mr-2">✅</span>Winner gets $1,000 cash instantly</li>
+                        <li class="flex items-start"><span class="text-green-400 mr-2">✅</span>Contest ends Mar 31st or first to 1,000</li>
+                    </ul>
+                </div>
+                
+                <div class="text-2xl font-bold text-yellow-400 mb-6">Current Leader: <span id="currentLeader">47 deposits</span></div>
+                
+                <button id="joinContestBtn" class="bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-bold py-4 px-8 rounded-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+                    <i class="fas fa-trophy mr-2"></i>JOIN $1,000 CONTEST
+                </button>
+            </div>
+
+            <!-- Live Stats -->
+            <div class="grid grid-cols-3 gap-6 max-w-lg mx-auto mb-8">
+                <div class="text-center"><div id="memberCount" class="text-3xl font-bold text-yellow-400">1,247</div><div class="text-sm text-gray-400">Total Users</div></div>
+                <div class="text-center"><div id="validReferrals" class="text-3xl font-bold text-green-400">$15,600</div><div class="text-sm text-gray-400">Total Deposits</div></div>
+                <div class="text-center"><div id="daysLeft" class="text-3xl font-bold text-red-400">87</div><div class="text-sm text-gray-400">Days Left</div></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 bg-gray-800">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-4">
+                <span class="text-yellow-400">Revolutionary Features</span> Coming Soon
+            </h2>
+            <p class="text-center text-gray-400 mb-16">Why thousands are joining the early access</p>
             
-            <button class="bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-bold py-4 px-8 rounded-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
-                <i class="fas fa-trophy mr-2"></i>COMING SOON
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="feature-card bg-gray-700 rounded-2xl p-8 text-center border border-gray-600">
+                    <div class="w-16 h-16 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-coins text-2xl text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4 text-orange-400">Instant Crypto Payouts</h3>
+                    <p class="text-gray-300">Deposit and withdraw with Bitcoin, Ethereum, USDC, and 20+ cryptocurrencies. Lightning-fast transactions.</p>
+                </div>
+                
+                <div class="feature-card bg-gray-700 rounded-2xl p-8 text-center border border-gray-600">
+                    <div class="w-16 h-16 bg-gradient-to-br from-purple-400 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-brain text-2xl text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4 text-purple-400">AI Prediction Engine</h3>
+                    <p class="text-gray-300">Advanced machine learning models analyze thousands of data points to provide 85%+ accurate predictions.</p>
+                </div>
+                
+                <div class="feature-card bg-gray-700 rounded-2xl p-8 text-center border border-gray-600">
+                    <div class="w-16 h-16 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-users text-2xl text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4 text-green-400">Social Betting</h3>
+                    <p class="text-gray-300">Create custom bets, challenge friends, join betting pools, and follow top bettors worldwide.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contest CTA -->
+    <section id="contest" class="py-20 bg-gradient-to-r from-green-600/20 to-emerald-600/20">
+        <div class="container mx-auto px-4 text-center">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="text-5xl font-black mb-6">
+                    <span class="text-green-400">Ready to Win</span>
+                    <span class="text-yellow-400"> $1,000?</span>
+                </h2>
+                <p class="text-xl text-gray-300 mb-8">Join thousands competing for the biggest referral prize in sports betting</p>
+                
+                <div class="bg-gray-800/50 rounded-2xl p-8 mb-8 border border-green-400/50">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+                        <div class="text-center">
+                            <div class="text-4xl font-black text-yellow-400">1.</div>
+                            <h3 class="text-xl font-bold mb-2">Sign Up Free</h3>
+                            <p class="text-gray-400">Create your account and get instant access to the platform</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-4xl font-black text-green-400">2.</div>
+                            <h3 class="text-xl font-bold mb-2">Deposit $10</h3>
+                            <p class="text-gray-400">Make the minimum deposit to qualify for the contest</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-4xl font-black text-orange-400">3.</div>
+                            <h3 class="text-xl font-bold mb-2">Share & Win</h3>
+                            <p class="text-gray-400">Get your referral link and start sharing to win $1,000</p>
+                        </div>
+                    </div>
+                    
+                    <button id="finalJoinBtn" class="bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-bold py-6 px-12 rounded-xl text-2xl transition-all duration-300 transform hover:scale-105 money-glow">
+                        <i class="fas fa-rocket mr-3"></i>JOIN CONTEST NOW
+                    </button>
+                </div>
+                
+                <p class="text-sm text-gray-500">Contest ends March 31st, 2024 or when first person reaches 1,000 verified deposits</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Signup Modal -->
+    <div id="signupModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-50 hidden">
+        <div class="bg-gray-800 rounded-2xl p-8 max-w-md mx-4 border-2 border-yellow-400 max-h-[90vh] overflow-y-auto">
+            <div class="text-center mb-6">
+                <div class="text-4xl mb-4">🏆</div>
+                <h3 class="text-2xl font-bold text-yellow-400 mb-2">Join the $1,000 Contest</h3>
+                <p class="text-gray-300">Step 1: Create your account</p>
+            </div>
+            
+            <form id="signupForm" class="space-y-4">
+                <input type="email" id="signupEmail" placeholder="Enter your email" required class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-yellow-400 focus:outline-none text-base">
+                <input type="password" id="signupPassword" placeholder="Create password" required class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-yellow-400 focus:outline-none text-base">
+                <input type="text" id="signupPhone" placeholder="Phone number (optional)" class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-yellow-400 focus:outline-none text-base">
+                
+                <button type="submit" class="w-full bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-bold py-4 rounded-lg hover:shadow-2xl transition-all duration-300">
+                    CONTINUE TO DEPOSIT
+                </button>
+            </form>
+            
+            <div class="flex justify-between mt-6">
+                <button onclick="closeSignupModal()" class="text-gray-400 hover:text-white">Cancel</button>
+                <button onclick="showDepositModal()" class="text-yellow-400 hover:text-yellow-300">Already have account?</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Deposit Modal -->
+    <div id="depositModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-50 hidden">
+        <div class="bg-gray-800 rounded-2xl p-8 max-w-lg mx-4 border-2 border-green-400 max-h-[90vh] overflow-y-auto">
+            <div class="text-center mb-6">
+                <div class="text-4xl mb-4">💰</div>
+                <h3 class="text-2xl font-bold text-green-400 mb-2">Step 2: Deposit $10</h3>
+                <p class="text-gray-300">Minimum deposit to qualify for contest</p>
+            </div>
+            
+            <!-- Amount Selection -->
+            <div class="mb-6">
+                <label class="block text-sm font-bold text-gray-300 mb-2">Deposit Amount</label>
+                <div class="grid grid-cols-4 gap-2 mb-4">
+                    <button class="amount-btn bg-gray-700 hover:bg-green-600 py-2 rounded font-bold transition-colors" data-amount="10">$10</button>
+                    <button class="amount-btn bg-gray-700 hover:bg-green-600 py-2 rounded font-bold transition-colors" data-amount="25">$25</button>
+                    <button class="amount-btn bg-gray-700 hover:bg-green-600 py-2 rounded font-bold transition-colors" data-amount="50">$50</button>
+                    <button class="amount-btn bg-gray-700 hover:bg-green-600 py-2 rounded font-bold transition-colors" data-amount="100">$100</button>
+                </div>
+                <div class="relative">
+                    <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">$</span>
+                    <input id="customAmount" type="number" min="10" max="10000" value="10" class="w-full pl-8 pr-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:border-green-400 focus:outline-none text-base">
+                </div>
+            </div>
+            
+            <!-- Stripe Card Element -->
+            <div class="mb-6">
+                <label class="block text-sm font-bold text-gray-300 mb-2">Card Details</label>
+                <div id="card-element" class="bg-gray-700 border border-gray-600 rounded-lg p-4">
+                    <!-- Stripe Elements will create form elements here -->
+                </div>
+                <div id="card-errors" class="text-red-400 text-sm mt-2"></div>
+            </div>
+
+            <!-- Payment Processing -->
+            <div id="paymentProcessor" class="hidden mb-6">
+                <div class="bg-gray-700 rounded-lg p-4">
+                    <div class="text-sm text-gray-400 mb-2">Processing payment...</div>
+                    <div class="w-full bg-gray-600 rounded-full h-2">
+                        <div class="bg-green-400 h-2 rounded-full animate-pulse" style="width: 45%"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <button id="processDeposit" class="w-full bg-gradient-to-r from-green-400 to-emerald-500 text-black font-bold py-4 rounded-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 mb-4">
+                <i class="fas fa-lock mr-2"></i>SECURE DEPOSIT
+            </button>
+            
+            <div class="flex justify-between">
+                <button onclick="closeDepositModal()" class="text-gray-400 hover:text-white">Back</button>
+                <div class="text-xs text-gray-500">🔒 256-bit SSL encryption</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-50 hidden">
+        <div class="bg-gray-800 rounded-2xl p-8 max-w-md mx-4 text-center border-2 border-green-400">
+            <div class="text-6xl mb-4">🎉</div>
+            <h3 class="text-2xl font-bold text-green-400 mb-4">Contest Entry Complete!</h3>
+            <p class="text-gray-300 mb-6">You're now qualified! Here's your referral link to start winning $1,000:</p>
+            
+            <div class="bg-gray-700 rounded-lg p-4 mb-6">
+                <div class="text-sm text-gray-400 mb-2">Your referral link:</div>
+                <div class="flex items-center space-x-2">
+                    <input type="text" id="userReferralLink" value="thesportsdugout.com/ref/USER123" readonly class="flex-1 px-3 py-2 bg-gray-600 border border-gray-500 rounded text-white text-sm">
+                    <button onclick="copyUserLink()" class="bg-green-500 text-white px-4 py-2 rounded font-bold text-sm">COPY</button>
+                </div>
+            </div>
+            
+            <div class="bg-yellow-500/20 rounded-lg p-3 mb-6 border border-yellow-400/30">
+                <div class="text-sm font-bold text-yellow-400 mb-1">💡 How to Win:</div>
+                <div class="text-xs text-gray-300">
+                    Share your link everywhere! Each person who signs up AND deposits $10 counts as 1 referral. First to 1,000 wins $1,000 cash!
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-3 mb-6">
+                <button onclick="shareTwitter()" class="bg-blue-500 hover:bg-blue-600 py-2 rounded font-bold transition-colors">
+                    <i class="fab fa-twitter mr-1"></i>Twitter
+                </button>
+                <button onclick="shareInstagram()" class="bg-pink-500 hover:bg-pink-600 py-2 rounded font-bold transition-colors">
+                    <i class="fab fa-instagram mr-1"></i>Instagram
+                </button>
+            </div>
+            
+            <button onclick="closeSuccessModal()" class="bg-yellow-500 text-black px-6 py-3 rounded-lg font-bold">
+                START SHARING!
             </button>
         </div>
-        
-        <p class="text-gray-400 mt-8">Firebase Backend Successfully Deployed!</p>
     </div>
+
+    <script>
+        // Stripe Elements
+        let cardElement;
+        
+        // Initialize Stripe Elements
+        function initializeStripe() {
+            const style = {
+                base: {
+                    color: '#ffffff',
+                    fontFamily: 'Inter, system-ui, sans-serif',
+                    fontSmoothing: 'antialiased',
+                    fontSize: '16px',
+                    '::placeholder': {
+                        color: '#9CA3AF'
+                    }
+                },
+                invalid: {
+                    color: '#EF4444',
+                    iconColor: '#EF4444'
+                }
+            };
+
+            cardElement = elements.create('card', { style });
+            cardElement.mount('#card-element');
+
+            cardElement.on('change', ({error}) => {
+                const displayError = document.getElementById('card-errors');
+                if (error) {
+                    displayError.textContent = error.message;
+                } else {
+                    displayError.textContent = '';
+                }
+            });
+        }
+
+        // Modal functions
+        function showSignupModal() {
+            document.getElementById('signupModal').classList.remove('hidden');
+        }
+
+        function closeSignupModal() {
+            document.getElementById('signupModal').classList.add('hidden');
+        }
+
+        function showDepositModal() {
+            closeSignupModal();
+            document.getElementById('depositModal').classList.remove('hidden');
+            if (!cardElement) {
+                initializeStripe();
+            }
+        }
+
+        function closeDepositModal() {
+            document.getElementById('depositModal').classList.add('hidden');
+        }
+
+        function closeSuccessModal() {
+            document.getElementById('successModal').classList.add('hidden');
+        }
+
+        // Join contest button handlers
+        document.getElementById('joinContestBtn').addEventListener('click', showSignupModal);
+        document.getElementById('mainJoinBtn').addEventListener('click', showSignupModal);
+        document.getElementById('finalJoinBtn').addEventListener('click', showSignupModal);
+
+        // Signup form
+        document.getElementById('signupForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            
+            if (email && password) {
+                showDepositModal();
+            }
+        });
+
+        // Amount selection
+        document.querySelectorAll('.amount-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const amount = this.getAttribute('data-amount');
+                document.getElementById('customAmount').value = amount;
+                
+                document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('bg-green-600'));
+                this.classList.add('bg-green-600');
+            });
+        });
+
+        // Process deposit
+        document.getElementById('processDeposit').addEventListener('click', async function() {
+            const amount = document.getElementById('customAmount').value;
+            const email = document.getElementById('signupEmail').value;
+            
+            if (amount < 10) {
+                showAlert('Minimum deposit is $10');
+                return;
+            }
+            
+            // Show processing
+            document.getElementById('paymentProcessor').classList.remove('hidden');
+            this.disabled = true;
+            this.textContent = 'PROCESSING...';
+            
+            try {
+                // Create payment intent
+                const response = await fetch(`${API_BASE_URL}/create-payment-intent`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        amount: amount * 100, // Stripe uses cents
+                        currency: 'usd',
+                        email: email
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Payment setup failed');
+                }
+                
+                const { client_secret } = await response.json();
+                
+                // Confirm payment with Stripe
+                const {error, paymentIntent} = await stripe.confirmCardPayment(client_secret, {
+                    payment_method: {
+                        card: cardElement,
+                        billing_details: {
+                            email: email
+                        }
+                    }
+                });
+                
+                if (error) {
+                    showAlert('Payment failed: ' + error.message);
+                } else {
+                    // Payment succeeded
+                    handleSuccessfulPayment();
+                }
+            } catch (error) {
+                console.error('Payment error:', error);
+                showAlert('Payment failed. Please try again.');
+            }
+            
+            // Reset button
+            document.getElementById('paymentProcessor').classList.add('hidden');
+            this.disabled = false;
+            this.innerHTML = '<i class="fas fa-lock mr-2"></i>SECURE DEPOSIT';
+        });
+
+        function handleSuccessfulPayment() {
+            closeDepositModal();
+            
+            // Generate referral code
+            const userCode = 'TSD' + Math.random().toString(36).substr(2, 6).toUpperCase();
+            document.getElementById('userReferralLink').value = `thesportsdugout.com/ref/${userCode}`;
+            
+            // Show success
+            document.getElementById('successModal').classList.remove('hidden');
+        }
+
+        // Custom alert function
+        function showAlert(message) {
+            const alertModal = document.createElement('div');
+            alertModal.className = 'fixed inset-0 bg-black/90 flex items-center justify-center z-50';
+            alertModal.innerHTML = `
+                <div class="bg-gray-800 rounded-2xl p-6 max-w-sm mx-4 text-center border-2 border-red-400">
+                    <div class="text-4xl mb-4">⚠️</div>
+                    <p class="text-white mb-4">${message}</p>
+                    <button onclick="this.closest('.fixed').remove()" class="bg-red-500 text-white px-6 py-2 rounded-lg font-bold">
+                        OK
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(alertModal);
+        }
+
+        // Copy referral link
+        function copyUserLink() {
+            const link = document.getElementById('userReferralLink');
+            link.select();
+            navigator.clipboard.writeText(link.value).then(() => {
+                const button = event.target;
+                const originalText = button.textContent;
+                button.textContent = 'COPIED!';
+                button.style.backgroundColor = '#10B981';
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.style.backgroundColor = '#22C55E';
+                }, 2000);
+            });
+        }
+
+        // Social sharing
+        function shareTwitter() {
+            const text = "🚨 $1,000 CASH CONTEST! First to get 1,000 referrals wins! Join The Sports Dugout - revolutionary crypto sports betting with AI predictions! 🏆⚾";
+            const url = "https://thesportsdugout.com";
+            window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
+        }
+
+        function shareInstagram() {
+            navigator.clipboard.writeText('thesportsdugout.com - $1,000 Cash Contest!').then(() => {
+                showAlert('✅ Link copied! Paste in your Instagram story with: "$1,000 CASH CONTEST at The Sports Dugout!"');
+            });
+        }
+
+        // Live counter updates
+        let memberCount = 1247;
+        let totalDeposits = 15600;
+        let currentLeader = 47;
+        let daysLeft = 87;
+
+        function updateCounters() {
+            if (Math.random() > 0.4) {
+                memberCount += Math.floor(Math.random() * 3) + 1;
+                document.getElementById('memberCount').textContent = memberCount.toLocaleString();
+            }
+            
+            if (Math.random() > 0.7) {
+                totalDeposits += Math.floor(Math.random() * 50) + 10;
+                document.getElementById('validReferrals').textContent = '$' + totalDeposits.toLocaleString();
+            }
+            
+            if (Math.random() > 0.9) {
+                currentLeader += Math.floor(Math.random() * 2);
+                document.getElementById('currentLeader').textContent = `${currentLeader} deposits`;
+            }
+            
+            setTimeout(updateCounters, 15000);
+        }
+
+        // Start counter updates
+        updateCounters();
+
+        // Smooth scrolling for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+    </script>
 </body>
 </html>
+EOF
