@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Sports Dugout - $1,000 Cash Referral Contest</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <script src="https://js.stripe.com/v3/"></script>
+    <script>
+        const stripe = Stripe(pk_live_51RIEWqENa3zBKoIjohkMbyimhQ4wDIIhBXu9AbUlGQFlD9NPXkwMBG6CdHpMPFfhWzstc9eb0Ew8WF39ddNJqLkc00ApVBESbd);
+        const elements = stripe.elements();
+        const API_BASE_URL = 'https://us-central1-sports-dugout-contest.cloudfunctions.net/api';
+    </script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex items-center justify-center">
+    <div class="text-center max-w-4xl mx-auto p-8">
+        <div class="w-32 h-32 mx-auto mb-6 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
+            <i class="fas fa-baseball-ball text-4xl text-white"></i>
+        </div>
+        
+        <h1 class="text-5xl md:text-7xl font-black mb-4">
+            <span class="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">THE SPORTS</span><br>
+            <span class="bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">DUGOUT</span>
+        </h1>
+        
+        <h2 class="text-2xl md:text-4xl font-bold mb-6 text-gray-300">$1,000 Cash Contest</h2>
+        
+        <div class="bg-gradient-to-r from-green-500/20 to-emerald-600/20 backdrop-blur-lg rounded-2xl p-8 border-2 border-green-400">
+            <div class="text-6xl mb-4">💵</div>
+            <h3 class="text-4xl font-black text-green-400 mb-2">$1,000 CASH PRIZE</h3>
+            <p class="text-xl text-gray-300 mb-4">First person to get 1,000 valid paying referrals wins cold hard cash!</p>
+            
+            <button class="bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-bold py-4 px-8 rounded-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+                <i class="fas fa-trophy mr-2"></i>COMING SOON
+            </button>
+        </div>
+        
+        <p class="text-gray-400 mt-8">Firebase Backend Successfully Deployed!</p>
+    </div>
+</body>
+</html>
