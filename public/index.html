@@ -8,10 +8,22 @@
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     <script src="https://js.stripe.com/v3/"></script>
     <script>
-        // Initialize Stripe - REPLACE WITH YOUR REAL KEY
-        const Stripe ('pk_test_51RIEWzClJKFMgGUVXReMnil6Bu7BWgmRUbngGEfdvNuUfhqZgauskSifwA3b0opq4YdSqZ2phbTNiDqEdrVl0pMf00EzC01vgP'); // Replace with your actual key
-        const elements = stripe.elements();
+        // Initialize Stripe - REPLACE WITH YOUR REAL LIVE KEY
+        const stripe = Stripe pk_test_('51SDZkbRWlGlYKks1BRpL3Jc18IuQkJ4yG2kSpDucs20HGieK1XgkPwbm2weJ2HVlgZ1Yq9ray33Nz5Vqw6AEiCA600ITd4dnl8'); // Replace with your actual key
         const API_BASE_URL = window.location.origin + '/api';
+        
+        let elements;
+        let cardElement;
+        
+        // Initialize Stripe Elements when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            if (stripe) {
+                elements = stripe.elements();
+                console.log('Stripe loaded successfully');
+            } else {
+                console.error('Stripe failed to load');
+            }
+        });
     </script>
     <style>
         .hero-gradient { background: linear-gradient(135deg, #1a202c 0%, #2d3748 25%, #4a5568 75%, #718096 100%); }
@@ -19,8 +31,32 @@
         @keyframes pulse-gold { 0%, 100% { box-shadow: 0 0 20px #FFD700; } 50% { box-shadow: 0 0 40px #FFD700, 0 0 60px #FFA500; } }
         .money-glow { animation: money-glow 3s ease-in-out infinite alternate; }
         @keyframes money-glow { from { box-shadow: 0 0 30px #10B981, 0 0 60px #059669; } to { box-shadow: 0 0 50px #10B981, 0 0 100px #059669; } }
-        .feature-card { transition: all 0.3s ease; }
-        .feature-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+        
+        /* Fix Stripe Elements styling */
+        .StripeElement {
+            box-sizing: border-box;
+            height: 50px;
+            padding: 10px 12px;
+            border: 1px solid #4B5563;
+            border-radius: 8px;
+            background-color: #374151;
+            box-shadow: 0 1px 3px 0 #E5E7EB;
+            -webkit-transition: box-shadow 150ms ease;
+            transition: box-shadow 150ms ease;
+        }
+
+        .StripeElement--focus {
+            border-color: #10B981;
+            box-shadow: 0 1px 3px 0 #10B981;
+        }
+
+        .StripeElement--invalid {
+            border-color: #EF4444;
+        }
+
+        .StripeElement--webkit-autofill {
+            background-color: #FEFCBF;
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-white">
@@ -108,7 +144,7 @@
             <p class="text-center text-gray-400 mb-16">Why thousands are joining the early access</p>
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <div class="feature-card bg-gray-700 rounded-2xl p-8 text-center border border-gray-600">
+                <div class="bg-gray-700 rounded-2xl p-8 text-center border border-gray-600 hover:transform hover:-translate-y-2 transition-all duration-300">
                     <div class="w-16 h-16 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
                         <i class="fas fa-coins text-2xl text-white"></i>
                     </div>
@@ -116,7 +152,7 @@
                     <p class="text-gray-300">Deposit and withdraw with Bitcoin, Ethereum, USDC, and 20+ cryptocurrencies. Lightning-fast transactions.</p>
                 </div>
                 
-                <div class="feature-card bg-gray-700 rounded-2xl p-8 text-center border border-gray-600">
+                <div class="bg-gray-700 rounded-2xl p-8 text-center border border-gray-600 hover:transform hover:-translate-y-2 transition-all duration-300">
                     <div class="w-16 h-16 bg-gradient-to-br from-purple-400 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-6">
                         <i class="fas fa-brain text-2xl text-white"></i>
                     </div>
@@ -124,7 +160,7 @@
                     <p class="text-gray-300">Advanced machine learning models analyze thousands of data points to provide 85%+ accurate predictions.</p>
                 </div>
                 
-                <div class="feature-card bg-gray-700 rounded-2xl p-8 text-center border border-gray-600">
+                <div class="bg-gray-700 rounded-2xl p-8 text-center border border-gray-600 hover:transform hover:-translate-y-2 transition-all duration-300">
                     <div class="w-16 h-16 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6">
                         <i class="fas fa-users text-2xl text-white"></i>
                     </div>
@@ -176,7 +212,7 @@
 
     <!-- Signup Modal -->
     <div id="signupModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-50 hidden">
-        <div class="bg-gray-800 rounded-2xl p-8 max-w-md mx-4 border-2 border-yellow-400 max-h-[90vh] overflow-y-auto">
+        <div class="bg-gray-800 rounded-2xl p-8 max-w-md mx-4 border-2 border-yellow-400">
             <div class="text-center mb-6">
                 <div class="text-4xl mb-4">🏆</div>
                 <h3 class="text-2xl font-bold text-yellow-400 mb-2">Join the $1,000 Contest</h3>
@@ -201,7 +237,7 @@
 
     <!-- Deposit Modal -->
     <div id="depositModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-50 hidden">
-        <div class="bg-gray-800 rounded-2xl p-8 max-w-lg mx-4 border-2 border-green-400 max-h-[90vh] overflow-y-auto">
+        <div class="bg-gray-800 rounded-2xl p-8 max-w-lg mx-4 border-2 border-green-400">
             <div class="text-center mb-6">
                 <div class="text-4xl mb-4">💰</div>
                 <h3 class="text-2xl font-bold text-green-400 mb-2">Step 2: Deposit $10</h3>
@@ -226,7 +262,7 @@
             <!-- Stripe Card Element -->
             <div class="mb-6">
                 <label class="block text-sm font-bold text-gray-300 mb-2">Card Details</label>
-                <div id="card-element" class="bg-gray-700 border border-gray-600 rounded-lg p-4">
+                <div id="card-element" class="bg-gray-700 border border-gray-600 rounded-lg min-h-[50px]">
                     <!-- Stripe Elements will create form elements here -->
                 </div>
                 <div id="card-errors" class="text-red-400 text-sm mt-2"></div>
@@ -265,34 +301,67 @@
     </div>
 
     <script>
-        // Stripe Elements
-        let cardElement;
-        
-        // Initialize Stripe Elements
+        // Initialize Stripe Elements properly
         function initializeStripe() {
+            console.log('Initializing Stripe Elements...');
+            
             if (!stripe) {
                 console.error('Stripe not loaded');
-                return;
+                return false;
             }
             
-            const style = {
-                base: {
-                    color: '#ffffff',
-                    fontFamily: 'Inter, system-ui, sans-serif',
-                    fontSmoothing: 'antialiased',
-                    fontSize: '16px',
-                    '::placeholder': { color: '#9CA3AF' }
+            if (!elements) {
+                elements = stripe.elements();
+            }
+            
+            // Create card element with proper styling
+            const cardElementOptions = {
+                style: {
+                    base: {
+                        color: '#ffffff',
+                        fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
+                        fontSmoothing: 'antialiased',
+                        fontSize: '16px',
+                        '::placeholder': {
+                            color: '#9CA3AF'
+                        }
+                    },
+                    invalid: {
+                        color: '#EF4444',
+                        iconColor: '#EF4444'
+                    }
                 },
-                invalid: { color: '#EF4444', iconColor: '#EF4444' }
+                hidePostalCode: false
             };
 
-            cardElement = elements.create('card', { style });
-            cardElement.mount('#card-element');
-
-            cardElement.on('change', ({error}) => {
-                const displayError = document.getElementById('card-errors');
-                displayError.textContent = error ? error.message : '';
-            });
+            // Remove existing card element if it exists
+            if (cardElement) {
+                cardElement.unmount();
+            }
+            
+            cardElement = elements.create('card', cardElementOptions);
+            
+            // Mount the element
+            const cardContainer = document.getElementById('card-element');
+            if (cardContainer) {
+                cardElement.mount('#card-element');
+                console.log('Card element mounted successfully');
+                
+                // Listen for real-time validation errors
+                cardElement.on('change', function(event) {
+                    const displayError = document.getElementById('card-errors');
+                    if (event.error) {
+                        displayError.textContent = event.error.message;
+                    } else {
+                        displayError.textContent = '';
+                    }
+                });
+                
+                return true;
+            } else {
+                console.error('Card element container not found');
+                return false;
+            }
         }
 
         // Modal functions
@@ -307,13 +376,22 @@
         function showDepositModal() {
             closeSignupModal();
             document.getElementById('depositModal').classList.remove('hidden');
-            if (!cardElement) {
-                setTimeout(initializeStripe, 100);
-            }
+            
+            // Initialize Stripe when deposit modal opens
+            setTimeout(() => {
+                const initialized = initializeStripe();
+                if (!initialized) {
+                    document.getElementById('card-errors').textContent = 'Payment form loading error. Please refresh page.';
+                }
+            }, 500);
         }
 
         function closeDepositModal() {
             document.getElementById('depositModal').classList.add('hidden');
+            if (cardElement) {
+                cardElement.unmount();
+                cardElement = null;
+            }
         }
 
         function closeSuccessModal() {
@@ -327,19 +405,27 @@
 
         document.getElementById('signupForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            showDepositModal();
+            
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            
+            if (email && password) {
+                showDepositModal();
+            }
         });
 
         // Amount selection
         document.querySelectorAll('.amount-btn').forEach(btn => {
             btn.addEventListener('click', function() {
-                document.getElementById('customAmount').value = this.getAttribute('data-amount');
+                const amount = this.getAttribute('data-amount');
+                document.getElementById('customAmount').value = amount;
+                
                 document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('bg-green-600'));
                 this.classList.add('bg-green-600');
             });
         });
 
-        // Process deposit
+        // Process deposit with better error handling
         document.getElementById('processDeposit').addEventListener('click', async function() {
             const amount = document.getElementById('customAmount').value;
             const email = document.getElementById('signupEmail').value;
@@ -349,66 +435,121 @@
                 return;
             }
             
+            if (!cardElement) {
+                alert('Payment form not ready. Please close and reopen the deposit window.');
+                return;
+            }
+            
             this.disabled = true;
             this.textContent = 'PROCESSING...';
             
             try {
-                const response = await fetch(`${API_BASE_URL}/create-payment-intent`, {
+                console.log('Creating payment intent...');
+                
+                const response = await fetch(API_BASE_URL, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
                     body: JSON.stringify({
-                        amount: amount * 100,
+                        amount: amount * 100, // Convert to cents
                         currency: 'usd',
                         email: email
                     })
                 });
                 
-                const { client_secret } = await response.json();
+                const data = await response.json();
+                console.log('Payment intent response:', data);
                 
-                const {error, paymentIntent} = await stripe.confirmCardPayment(client_secret, {
+                if (!response.ok) {
+                    throw new Error(data.message || data.error || 'Payment setup failed');
+                }
+                
+                if (!data.client_secret) {
+                    throw new Error('No payment secret received');
+                }
+                
+                console.log('Confirming payment...');
+                
+                const { error, paymentIntent } = await stripe.confirmCardPayment(data.client_secret, {
                     payment_method: {
                         card: cardElement,
-                        billing_details: { email: email }
+                        billing_details: {
+                            name: 'Contest Entry',
+                            email: email
+                        }
                     }
                 });
                 
                 if (error) {
+                    console.error('Payment error:', error);
                     alert('Payment failed: ' + error.message);
                 } else {
+                    console.log('Payment succeeded:', paymentIntent);
+                    
+                    // Success - close deposit modal and show success
                     closeDepositModal();
+                    
+                    // Generate referral code
                     const userCode = 'TSD' + Math.random().toString(36).substr(2, 6).toUpperCase();
                     document.getElementById('userReferralLink').value = `thesportsdugout.com/ref/${userCode}`;
+                    
+                    // Show success modal
                     document.getElementById('successModal').classList.remove('hidden');
                 }
+                
             } catch (error) {
-                alert('Payment failed. Please try again.');
+                console.error('Payment processing error:', error);
+                alert('Payment failed: ' + error.message);
             }
             
             this.disabled = false;
             this.innerHTML = '<i class="fas fa-lock mr-2"></i>SECURE DEPOSIT';
         });
 
+        // Copy referral link
         function copyUserLink() {
             const link = document.getElementById('userReferralLink');
             link.select();
-            navigator.clipboard.writeText(link.value);
-            event.target.textContent = 'COPIED!';
+            document.execCommand('copy');
+            
+            const button = event.target;
+            const originalText = button.textContent;
+            button.textContent = 'COPIED!';
+            button.style.backgroundColor = '#10B981';
+            
+            setTimeout(() => {
+                button.textContent = originalText;
+                button.style.backgroundColor = '#22C55E';
+            }, 2000);
         }
 
         // Live counter updates
-        let memberCount = 1247, totalDeposits = 15600, currentLeader = 47;
-        setInterval(() => {
-            if (Math.random() > 0.7) {
+        let memberCount = 1247;
+        let totalDeposits = 15600;
+        let currentLeader = 47;
+
+        function updateCounters() {
+            if (Math.random() > 0.4) {
                 memberCount += Math.floor(Math.random() * 3) + 1;
                 document.getElementById('memberCount').textContent = memberCount.toLocaleString();
+            }
+            
+            if (Math.random() > 0.7) {
                 totalDeposits += Math.floor(Math.random() * 50) + 10;
                 document.getElementById('validReferrals').textContent = '$' + totalDeposits.toLocaleString();
-                if (Math.random() > 0.9) {
-                    currentLeader += Math.floor(Math.random() * 2);
-                    document.getElementById('currentLeader').textContent = `${currentLeader} deposits`;
-                }
             }
-        }, 15000);
+            
+            if (Math.random() > 0.9) {
+                currentLeader += Math.floor(Math.random() * 2);
+                document.getElementById('currentLeader').textContent = `${currentLeader} deposits`;
+            }
+            
+            setTimeout(updateCounters, 15000);
+        }
+
+        // Start counter updates
+        updateCounters();
     </script>
 </body>
 </html>
