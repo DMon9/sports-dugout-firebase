@@ -11,25 +11,31 @@ export default async function handler(req, res) {
     return;
   }
 
-  const { pathname } = new URL(req.url, `http://${req.headers.host}`);
+  console.log('API called:', req.method, req.url);
 
   // Health check
-  if (pathname === '/api' && req.method === 'GET') {
+  if (req.method === 'GET') {
     res.json({
       status: 'Sports Dugout API is running!',
       timestamp: new Date().toISOString(),
-      version: '1.0.0'
+      stripe_configured: !!process.env.STRIPE_SECRET_KEY
     });
     return;
   }
 
   // Create payment intent
-  if (pathname === '/api/create-payment-intent' && req.method === 'POST') {
+  if (req.method === 'POST') {
     try {
       const { amount, currency = 'usd', email } = req.body;
       
+      console.log('Payment request:', { amount, email });
+      
       if (!amount || amount < 1000) {
         return res.status(400).json({ error: 'Minimum amount is $10' });
+      }
+
+      if (!process.env.STRIPE_SECRET_KEY) {
+        return res.status(500).json({ error: 'Stripe not configured' });
       }
 
       const paymentIntent = await stripe.paymentIntents.create({
@@ -44,6 +50,8 @@ export default async function handler(req, res) {
         description: 'Sports Dugout Contest Entry - $1,000 Prize'
       });
 
+      console.log('Payment intent created:', paymentIntent.id);
+
       res.json({
         client_secret: paymentIntent.client_secret,
         payment_intent_id: paymentIntent.id
@@ -56,31 +64,6 @@ export default async function handler(req, res) {
         message: error.message 
       });
     }
-    return;
-  }
-
-  // Webhook
-  if (pathname === '/api/webhook' && req.method === 'POST') {
-    const sig = req.headers['stripe-signature'];
-    let event;
-
-    try {
-      event = stripe.webhooks.constructEvent(
-        req.body, 
-        sig, 
-        process.env.STRIPE_WEBHOOK_SECRET
-      );
-    } catch (err) {
-      return res.status(400).send(`Webhook Error: ${err.message}`);
-    }
-
-    if (event.type === 'payment_intent.succeeded') {
-      const paymentIntent = event.data.object;
-      console.log('✅ Payment succeeded:', paymentIntent.id);
-      // TODO: Add to contest database
-    }
-
-    res.json({ received: true });
     return;
   }
 
