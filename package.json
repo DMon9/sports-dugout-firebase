@@ -1,11 +1,1 @@
-{
-  "name": "sports-dugout-contest",
-  "version": "2.0.0",
-  "dependencies": {
-    "stripe": "^14.10.0",
-    "firebase-admin": "^12.0.0"
-  }
-  "engines": {
-    "node": "18"
-  }
-}
+{"name":"sports-dugout-contest","version":"2.0.0","dependencies":{"stripe":"^14.10.0","firebase-admin":"^12.0.0"},"engines":{"node":"18"}}
