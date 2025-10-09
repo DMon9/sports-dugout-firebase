@@ -1,7 +1,7 @@
+cat > api/index.js << 'EOF'
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 export default async function handler(req, res) {
-  // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -18,7 +18,8 @@ export default async function handler(req, res) {
     res.json({
       status: 'Sports Dugout API is running!',
       timestamp: new Date().toISOString(),
-      stripe_configured: !!process.env.STRIPE_SECRET_KEY
+      stripe_configured: !!process.env.STRIPE_SECRET_KEY,
+      mode: process.env.STRIPE_SECRET_KEY?.includes('test') ? 'test' : 'live'
     });
     return;
   }
@@ -28,7 +29,7 @@ export default async function handler(req, res) {
     try {
       const { amount, currency = 'usd', email } = req.body;
       
-      console.log('Payment request:', { amount, email });
+      console.log('💳 Payment request:', { amount, email, mode: 'test' });
       
       if (!amount || amount < 1000) {
         return res.status(400).json({ error: 'Minimum amount is $10' });
@@ -41,27 +42,32 @@ export default async function handler(req, res) {
       const paymentIntent = await stripe.paymentIntents.create({
         amount: parseInt(amount),
         currency: currency,
+        automatic_payment_methods: {
+          enabled: true,
+        },
         metadata: {
           contest: 'sports_dugout_1000',
           email: email || '',
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
+          mode: 'test'
         },
         receipt_email: email,
-        description: 'Sports Dugout Contest Entry - $1,000 Prize'
+        description: 'Sports Dugout Contest Entry - $1,000 Prize (TEST)',
       });
 
-      console.log('Payment intent created:', paymentIntent.id);
+      console.log('✅ Payment intent created:', paymentIntent.id);
 
       res.json({
+        success: true,
         client_secret: paymentIntent.client_secret,
         payment_intent_id: paymentIntent.id
       });
 
     } catch (error) {
-      console.error('Payment error:', error);
+      console.error('❌ Stripe error:', error);
       res.status(500).json({ 
-        error: 'Payment processing failed',
-        message: error.message 
+        error: error.message || 'Payment processing failed',
+        type: error.type || 'unknown_error'
       });
     }
     return;
@@ -69,3 +75,4 @@ export default async function handler(req, res) {
 
   res.status(404).json({ error: 'Endpoint not found' });
 }
+EOF
