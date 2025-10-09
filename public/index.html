@@ -8,8 +8,7 @@
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     <script src="https://js.stripe.com/v3/"></script>
     <script>
-        // Initialize Stripe - REPLACE WITH YOUR REAL LIVE KEY
-        const stripe = Stripe pk_test_('51SDZkbRWlGlYKks1BRpL3Jc18IuQkJ4yG2kSpDucs20HGieK1XgkPwbm2weJ2HVlgZ1Yq9ray33Nz5Vqw6AEiCA600ITd4dnl8'); // Replace with your actual key
+        const stripe = Stripe('pk_test_51SDZkbRWlGlYKks1BRpL3Jc18IuQkJ4yG2kSpDucs20HGieK1XgkPwbm2weJ2HVlgZ1Yq9ray33Nz5Vqw6AEiCA600ITd4dnl8);
         const API_BASE_URL = window.location.origin + '/api';
         
         let elements;
