@@ -1,4 +1,4 @@
-
+cat > public/index.html << 'EOF'
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,40 +14,6 @@
         @keyframes pulse-gold { 0%, 100% { box-shadow: 0 0 20px #FFD700; } 50% { box-shadow: 0 0 40px #FFD700, 0 0 60px #FFA500; } }
         .money-glow { animation: money-glow 3s ease-in-out infinite alternate; }
         @keyframes money-glow { from { box-shadow: 0 0 30px #10B981, 0 0 60px #059669; } to { box-shadow: 0 0 50px #10B981, 0 0 100px #059669; } }
-        
-        /* Stripe Elements Custom Styling */
-        .StripeElement {
-            box-sizing: border-box;
-            height: 50px;
-            padding: 12px;
-            border: 2px solid #4B5563;
-            border-radius: 8px;
-            background-color: #374151;
-            color: white;
-            transition: border-color 0.3s ease;
-        }
-        
-        .StripeElement--focus {
-            border-color: #10B981;
-            outline: none;
-        }
-        
-        .StripeElement--invalid {
-            border-color: #EF4444;
-        }
-        
-        #card-element {
-            padding: 12px;
-            border: 2px solid #4B5563;
-            border-radius: 8px;
-            background-color: #374151;
-            min-height: 50px;
-            transition: border-color 0.3s ease;
-        }
-        
-        #card-element.focused {
-            border-color: #10B981;
-        }
     </style>
 </head>
 <body class="bg-gray-900 text-white">
@@ -69,7 +35,7 @@
                 <div class="hidden md:flex items-center space-x-6">
                     <a href="#contest" class="hover:text-yellow-400 transition-colors">Contest</a>
                     <a href="#features" class="hover:text-yellow-400 transition-colors">Features</a>
-                    <button id="mainJoinBtn" class="bg-yellow-500 hover:bg-yellow-400 text-black px-4 py-2 rounded-lg font-bold transition-colors">
+                    <button onclick="openSignup()" class="bg-yellow-500 hover:bg-yellow-400 text-black px-4 py-2 rounded-lg font-bold transition-colors">
                         JOIN NOW
                     </button>
                 </div>
@@ -78,7 +44,7 @@
     </nav>
 
     <!-- Hero Section -->
-    <section id="hero" class="hero-gradient min-h-screen flex items-center justify-center relative overflow-hidden">
+    <section class="hero-gradient min-h-screen flex items-center justify-center relative overflow-hidden">
         <div class="absolute inset-0 bg-black/50"></div>
         <div class="container mx-auto px-4 text-center relative z-10">
             <div class="mb-8">
@@ -112,16 +78,69 @@
                 
                 <div class="text-2xl font-bold text-yellow-400 mb-6">Current Leader: <span id="currentLeader">47 deposits</span></div>
                 
-                <button id="joinContestBtn" class="bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-bold py-4 px-8 rounded-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+                <button onclick="openSignup()" class="bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-bold py-4 px-8 rounded-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
                     <i class="fas fa-trophy mr-2"></i>JOIN $1,000 CONTEST
                 </button>
             </div>
 
             <!-- Live Stats -->
             <div class="grid grid-cols-3 gap-6 max-w-lg mx-auto mb-8">
-                <div class="text-center"><div id="memberCount" class="text-3xl font-bold text-yellow-400">1,247</div><div class="text-sm text-gray-400">Total Users</div></div>
-                <div class="text-center"><div id="validReferrals" class="text-3xl font-bold text-green-400">$15,600</div><div class="text-sm text-gray-400">Total Deposits</div></div>
-                <div class="text-center"><div id="daysLeft" class="text-3xl font-bold text-red-400">87</div><div class="text-sm text-gray-400">Days Left</div></div>
+                <div class="text-center"><div class="text-3xl font-bold text-yellow-400">1,247</div><div class="text-sm text-gray-400">Total Users</div></div>
+                <div class="text-center"><div class="text-3xl font-bold text-green-400">$15,600</div><div class="text-sm text-gray-400">Total Deposits</div></div>
+                <div class="text-center"><div class="text-3xl font-bold text-red-400">87</div><div class="text-sm text-gray-400">Days Left</div></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-20 bg-gray-800">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-4">
+                <span class="text-yellow-400">Revolutionary Features</span> Coming Soon
+            </h2>
+            <p class="text-center text-gray-400 mb-16">Why thousands are joining the early access</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-gray-700 rounded-2xl p-8 text-center border border-gray-600">
+                    <div class="w-16 h-16 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-coins text-2xl text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4 text-orange-400">Instant Crypto Payouts</h3>
+                    <p class="text-gray-300">Deposit and withdraw with Bitcoin, Ethereum, USDC, and 20+ cryptocurrencies.</p>
+                </div>
+                
+                <div class="bg-gray-700 rounded-2xl p-8 text-center border border-gray-600">
+                    <div class="w-16 h-16 bg-gradient-to-br from-purple-400 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-brain text-2xl text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4 text-purple-400">AI Prediction Engine</h3>
+                    <p class="text-gray-300">Advanced machine learning models analyze thousands of data points for 85%+ accuracy.</p>
+                </div>
+                
+                <div class="bg-gray-700 rounded-2xl p-8 text-center border border-gray-600">
+                    <div class="w-16 h-16 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-users text-2xl text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4 text-green-400">Social Betting</h3>
+                    <p class="text-gray-300">Create custom bets, challenge friends, join betting pools worldwide.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contest CTA -->
+    <section class="py-20 bg-gradient-to-r from-green-600/20 to-emerald-600/20">
+        <div class="container mx-auto px-4 text-center">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="text-5xl font-black mb-6">
+                    <span class="text-green-400">Ready to Win</span>
+                    <span class="text-yellow-400"> $1,000?</span>
+                </h2>
+                <p class="text-xl text-gray-300 mb-8">Join thousands competing for the biggest referral prize in sports betting</p>
+                
+                <button onclick="openSignup()" class="bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-bold py-6 px-12 rounded-xl text-2xl transition-all duration-300 transform hover:scale-105 money-glow">
+                    <i class="fas fa-rocket mr-3"></i>JOIN CONTEST NOW
+                </button>
             </div>
         </div>
     </section>
@@ -135,7 +154,7 @@
                 <p class="text-gray-300">Step 1: Create your account</p>
             </div>
             
-            <form id="signupForm" class="space-y-4">
+            <form onsubmit="proceedToDeposit(event)" class="space-y-4">
                 <input type="email" id="signupEmail" placeholder="Enter your email" required class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-yellow-400 focus:outline-none text-base">
                 <input type="password" id="signupPassword" placeholder="Create password" required class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-yellow-400 focus:outline-none text-base">
                 
@@ -144,7 +163,7 @@
                 </button>
             </form>
             
-            <button onclick="closeSignupModal()" class="w-full mt-4 text-gray-400 hover:text-white">Cancel</button>
+            <button onclick="closeSignup()" class="w-full mt-4 text-gray-400 hover:text-white">Cancel</button>
         </div>
     </div>
 
@@ -161,10 +180,10 @@
             <div class="mb-6">
                 <label class="block text-sm font-bold text-gray-300 mb-2">Deposit Amount</label>
                 <div class="grid grid-cols-4 gap-2 mb-4">
-                    <button class="amount-btn bg-gray-700 hover:bg-green-600 py-2 rounded font-bold transition-colors" data-amount="10">$10</button>
-                    <button class="amount-btn bg-gray-700 hover:bg-green-600 py-2 rounded font-bold transition-colors" data-amount="25">$25</button>
-                    <button class="amount-btn bg-gray-700 hover:bg-green-600 py-2 rounded font-bold transition-colors" data-amount="50">$50</button>
-                    <button class="amount-btn bg-gray-700 hover:bg-green-600 py-2 rounded font-bold transition-colors" data-amount="100">$100</button>
+                    <button type="button" onclick="setAmount(10)" class="amount-btn bg-gray-700 hover:bg-green-600 py-2 rounded font-bold transition-colors">$10</button>
+                    <button type="button" onclick="setAmount(25)" class="amount-btn bg-gray-700 hover:bg-green-600 py-2 rounded font-bold transition-colors">$25</button>
+                    <button type="button" onclick="setAmount(50)" class="amount-btn bg-gray-700 hover:bg-green-600 py-2 rounded font-bold transition-colors">$50</button>
+                    <button type="button" onclick="setAmount(100)" class="amount-btn bg-gray-700 hover:bg-green-600 py-2 rounded font-bold transition-colors">$100</button>
                 </div>
                 <div class="relative">
                     <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">$</span>
@@ -175,7 +194,7 @@
             <!-- Stripe Card Element -->
             <div class="mb-6">
                 <label class="block text-sm font-bold text-gray-300 mb-2">Card Details (TEST MODE)</label>
-                <div id="card-element">
+                <div id="card-element" class="p-4 bg-gray-700 border border-gray-600 rounded-lg min-h-[50px]">
                     <!-- Stripe Elements will create form elements here -->
                 </div>
                 <div id="card-errors" class="text-red-400 text-sm mt-2"></div>
@@ -184,12 +203,12 @@
                 </div>
             </div>
             
-            <button id="processDeposit" class="w-full bg-gradient-to-r from-green-400 to-emerald-500 text-black font-bold py-4 rounded-lg hover:shadow-2xl transition-all duration-300 mb-4">
+            <button onclick="processPayment()" id="processDeposit" class="w-full bg-gradient-to-r from-green-400 to-emerald-500 text-black font-bold py-4 rounded-lg hover:shadow-2xl transition-all duration-300 mb-4">
                 <i class="fas fa-lock mr-2"></i>SECURE DEPOSIT (TEST)
             </button>
             
             <div class="flex justify-between">
-                <button onclick="closeDepositModal()" class="text-gray-400 hover:text-white">Back</button>
+                <button onclick="closeDeposit()" class="text-gray-400 hover:text-white">Back</button>
                 <div class="text-xs text-gray-500">🔒 TEST MODE - No real charges</div>
             </div>
         </div>
@@ -206,63 +225,103 @@
                 <div class="text-sm text-gray-400 mb-2">Your referral link:</div>
                 <div class="flex items-center space-x-2">
                     <input type="text" id="userReferralLink" value="thesportsdugout.com/ref/USER123" readonly class="flex-1 px-3 py-2 bg-gray-600 border border-gray-500 rounded text-white text-sm">
-                    <button onclick="copyUserLink()" class="bg-green-500 text-white px-4 py-2 rounded font-bold text-sm">COPY</button>
+                    <button onclick="copyLink()" class="bg-green-500 text-white px-4 py-2 rounded font-bold text-sm">COPY</button>
                 </div>
             </div>
             
-            <button onclick="closeSuccessModal()" class="bg-yellow-500 text-black px-6 py-3 rounded-lg font-bold">
+            <button onclick="closeSuccess()" class="bg-yellow-500 text-black px-6 py-3 rounded-lg font-bold">
                 START SHARING!
             </button>
         </div>
     </div>
 
     <script>
-        // Initialize Stripe with TEST key
-        const stripe = Stripe ('pk_test_51SDZkbRWlGlYKks1BRpL3Jc18IuQkJ4yG2kSpDucs20HGieK1XgkPwbm2weJ2HVlgZ1Yq9ray33Nz5Vqw6AEiCA600ITd4dnl8'); // Replace with your TEST key
-        const API_BASE_URL = window.location.origin + '/api';
-        
-        let elements;
-        let cardElement;
+        // Initialize Stripe
+        const stripe = Stripe ('pk_test_51SDZkbRWlGlYKks1BRpL3Jc18IuQkJ4yG2kSpDucs20HGieK1XgkPwbm2weJ2HVlgZ1Yq9ray33Nz5Vqw6AEiCA600ITd4dnl8'); // Replace with your test key
+        let elements = null;
+        let cardElement = null;
 
-        // Initialize Stripe Elements when needed
-        function initializeStripe() {
-            console.log('🔄 Initializing Stripe Elements...');
+        // Simple modal functions
+        function openSignup() {
+            console.log('📱 Opening signup modal...');
+            document.getElementById('signupModal').classList.remove('hidden');
+        }
+
+        function closeSignup() {
+            console.log('📱 Closing signup modal...');
+            document.getElementById('signupModal').classList.add('hidden');
+        }
+
+        function proceedToDeposit(event) {
+            event.preventDefault();
+            console.log('📱 Proceeding to deposit...');
             
-            if (!stripe) {
-                console.error('❌ Stripe not loaded');
-                showError('Stripe failed to load. Please refresh the page.');
-                return false;
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            
+            if (!email || !password) {
+                alert('Please fill in all fields');
+                return;
             }
-
-            elements = stripe.elements();
             
-            // Create card element with dark theme
-            cardElement = elements.create('card', {
-                style: {
-                    base: {
-                        fontSize: '16px',
-                        color: '#ffffff',
-                        fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
-                        fontSmoothing: 'antialiased',
-                        '::placeholder': {
-                            color: '#9CA3AF'
-                        }
-                    },
-                    invalid: {
-                        color: '#EF4444',
-                        iconColor: '#EF4444'
-                    }
-                },
-                hidePostalCode: false
+            closeSignup();
+            openDeposit();
+        }
+
+        function openDeposit() {
+            console.log('📱 Opening deposit modal...');
+            document.getElementById('depositModal').classList.remove('hidden');
+            
+            // Initialize Stripe Elements
+            setTimeout(initializeStripe, 500);
+        }
+
+        function closeDeposit() {
+            console.log('📱 Closing deposit modal...');
+            document.getElementById('depositModal').classList.add('hidden');
+            if (cardElement) {
+                cardElement.unmount();
+                cardElement = null;
+            }
+        }
+
+        function setAmount(amount) {
+            document.getElementById('customAmount').value = amount;
+            
+            // Update button styling
+            document.querySelectorAll('.amount-btn').forEach(btn => {
+                btn.classList.remove('bg-green-600');
+                btn.classList.add('bg-gray-700');
             });
+            event.target.classList.remove('bg-gray-700');
+            event.target.classList.add('bg-green-600');
+        }
 
-            // Mount the element
-            const cardContainer = document.getElementById('card-element');
-            if (cardContainer) {
+        function initializeStripe() {
+            console.log('💳 Initializing Stripe...');
+            
+            try {
+                elements = stripe.elements();
+                
+                cardElement = elements.create('card', {
+                    style: {
+                        base: {
+                            fontSize: '16px',
+                            color: '#ffffff',
+                            fontFamily: 'Arial, sans-serif',
+                            '::placeholder': {
+                                color: '#9CA3AF'
+                            }
+                        },
+                        invalid: {
+                            color: '#EF4444'
+                        }
+                    }
+                });
+                
                 cardElement.mount('#card-element');
-                console.log('✅ Card element mounted successfully');
-
-                // Add event listeners
+                console.log('✅ Stripe card element mounted');
+                
                 cardElement.on('change', function(event) {
                     const displayError = document.getElementById('card-errors');
                     if (event.error) {
@@ -271,199 +330,39 @@
                         displayError.textContent = '';
                     }
                 });
-
-                cardElement.on('ready', function() {
-                    console.log('✅ Card element ready for input');
-                });
-
-                cardElement.on('focus', function() {
-                    document.getElementById('card-element').classList.add('focused');
-                });
-
-                cardElement.on('blur', function() {
-                    document.getElementById('card-element').classList.remove('focused');
-                });
-
-                return true;
-            } else {
-                console.error('❌ Card element container not found');
-                return false;
-            }
-        }
-
-        function showError(message) {
-            const errorDiv = document.getElementById('card-errors');
-            if (errorDiv) {
-                errorDiv.textContent = message;
-            } else {
-                alert(message);
-            }
-        }
-
-        // Modal functions
-        function showSignupModal() {
-            document.getElementById('signupModal').classList.remove('hidden');
-        }
-
-        function closeSignupModal() {
-            document.getElementById('signupModal').classList.add('hidden');
-        }
-
-        function showDepositModal() {
-            closeSignupModal();
-            document.getElementById('depositModal').classList.remove('hidden');
-            
-            // Initialize Stripe Elements after modal is shown
-            setTimeout(() => {
-                const success = initializeStripe();
-                if (!success) {
-                    showError('Payment form failed to load. Please refresh and try again.');
-                }
-            }, 300);
-        }
-
-        function closeDepositModal() {
-            document.getElementById('depositModal').classList.add('hidden');
-            if (cardElement) {
-                cardElement.unmount();
-                cardElement = null;
-            }
-        }
-
-        function closeSuccessModal() {
-            document.getElementById('successModal').classList.add('hidden');
-        }
-
-        // Event handlers
-        document.getElementById('joinContestBtn').addEventListener('click', showSignupModal);
-        document.getElementById('mainJoinBtn').addEventListener('click', showSignupModal);
-
-        document.getElementById('signupForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const email = document.getElementById('signupEmail').value;
-            const password = document.getElementById('signupPassword').value;
-            
-            if (email && password) {
-                showDepositModal();
-            }
-        });
-
-        // Amount selection
-        document.querySelectorAll('.amount-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const amount = this.getAttribute('data-amount');
-                document.getElementById('customAmount').value = amount;
                 
-                document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('bg-green-600'));
-                this.classList.add('bg-green-600');
-            });
-        });
-
-        // Process deposit
-        cat > public/payment-fix.js << EOF
-document.getElementById('processDeposit').addEventListener('click', async function() {
-    const amount = parseFloat(document.getElementById('customAmount').value);
-    const email = document.getElementById('signupEmail').value;
-    
-    console.log('🔄 Starting payment process...', { amount, email });
-    
-    if (!email || !email.includes('@')) {
-        showError('Please enter a valid email address');
-        return;
-    }
-    
-    if (amount < 10) {
-        showError('Minimum deposit is $10');
-        return;
-    }
-    
-    if (!cardElement) {
-        showError('Payment form not ready. Please refresh the page.');
-        return;
-    }
-    
-    this.disabled = true;
-    this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>PROCESSING...';
-    
-    try {
-        console.log('📡 Making API request to create payment intent...');
-        
-        // Use the dedicated payment intent endpoint
-        const response = await fetch('/api/create-payment-intent', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                amount: Math.round(amount * 100), // Ensure integer cents
-                currency: 'usd',
-                email: email.trim()
-            })
-        });
-        
-        console.log('📡 API Response status:', response.status);
-        
-        const responseText = await response.text();
-        console.log('📡 Raw response:', responseText);
-        
-        let data;
-        try {
-            data = JSON.parse(responseText);
-        } catch (parseError) {
-            console.error('❌ JSON parse error:', parseError);
-            throw new Error('Invalid response from server: ' + responseText.substring(0, 100));
-        }
-        
-        console.log('📦 Parsed response:', data);
-        
-        if (!response.ok) {
-            throw new Error(data.error || `Server error: ${response.status}`);
-        }
-        
-        if (!data.client_secret) {
-            throw new Error('No payment secret received from server');
-        }
-        
-        console.log('🔄 Confirming payment with Stripe...');
-        
-        // Confirm payment with Stripe
-        const { error, paymentIntent } = await stripe.confirmCardPayment(data.client_secret, {
-            payment_method: {
-                card: cardElement,
-                billing_details: {
-                    name: 'Contest Entry',
-                    email: email.trim()
-                }
+            } catch (error) {
+                console.error('❌ Stripe initialization error:', error);
+                document.getElementById('card-errors').textContent = 'Payment form failed to load';
             }
-        });
-        
-        console.log('💳 Stripe confirmation result:', { error, paymentIntent });
-        
-        if (error) {
-            console.error('❌ Stripe payment error:', error);
-            throw new Error(error.message);
-        } else {
-            console.log('🎉 Payment succeeded:', paymentIntent.id);
-            
-            // Success - close deposit modal and show success
-            closeDepositModal();
-            
-            // Generate referral code
-            const userCode = 'TSD' + Math.random().toString(36).substr(2, 6).toUpperCase();
-            document.getElementById('userReferralLink').value = `thesportsdugout.com/ref/${userCode}`;
-            
-            // Show success modal
-            document.getElementById('successModal').classList.remove('hidden');
         }
-        
-    } catch (error) {
-        console.error('💥 Payment processing error:', error);
-        showError('Payment failed: ' + error.message);
-    }
-    
-    this.disabled = false;
-    this.innerHTML = '<i class="fas fa-lock mr-2"></i>SECURE DEPOSIT (TEST)';
-});
+
+        async function processPayment() {
+            console.log('💳 Processing payment...');
+            
+            const button = document.getElementById('processDeposit');
+            const amount = parseFloat(document.getElementById('customAmount').value);
+            const email = document.getElementById('signupEmail').value;
+            
+            if (!email || amount < 10 || !cardElement) {
+                alert('Please fill in all fields correctly');
+                return;
+            }
+            
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>PROCESSING...';
+            
+            try {
+                // Create payment intent
+                const response = await fetch('/api/create-payment-intent', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        amount: Math.round(amount * 100),
+                        currency: 'usd',
+                        email: email
+                    })
+                });
                 
                 const data = await response.json();
                 console.log('📦 Payment intent response:', data);
@@ -472,74 +371,51 @@ document.getElementById('processDeposit').addEventListener('click', async functi
                     throw new Error(data.error || 'Payment setup failed');
                 }
                 
-                if (!data.client_secret) {
-                    throw new Error('No payment secret received');
-                }
-                
-                console.log('🔄 Confirming payment...');
-                
-                // Confirm payment with Stripe
+                // Confirm payment
                 const { error, paymentIntent } = await stripe.confirmCardPayment(data.client_secret, {
                     payment_method: {
                         card: cardElement,
-                        billing_details: {
-                            name: 'Contest Entry',
-                            email: email
-                        }
+                        billing_details: { email: email }
                     }
                 });
                 
                 if (error) {
-                    console.error('❌ Payment error:', error);
                     throw new Error(error.message);
                 } else {
                     console.log('✅ Payment succeeded:', paymentIntent.id);
-                    
-                    // Success - close deposit modal and show success
-                    closeDepositModal();
-                    
-                    // Generate referral code
-                    const userCode = 'TSD' + Math.random().toString(36).substr(2, 6).toUpperCase();
-                    document.getElementById('userReferralLink').value = `thesportsdugout.com/ref/${userCode}`;
-                    
-                    // Show success modal
-                    document.getElementById('successModal').classList.remove('hidden');
+                    showSuccess();
                 }
                 
             } catch (error) {
-                console.error('❌ Payment processing error:', error);
-                showError(error.message || 'Payment failed. Please try again.');
+                console.error('❌ Payment error:', error);
+                alert('Payment failed: ' + error.message);
             }
             
-            this.disabled = false;
-            this.innerHTML = '<i class="fas fa-lock mr-2"></i>SECURE DEPOSIT (TEST)';
-        });
+            button.disabled = false;
+            button.innerHTML = '<i class="fas fa-lock mr-2"></i>SECURE DEPOSIT (TEST)';
+        }
 
-        // Copy referral link
-        function copyUserLink() {
+        function showSuccess() {
+            closeDeposit();
+            const userCode = 'TSD' + Math.random().toString(36).substr(2, 6).toUpperCase();
+            document.getElementById('userReferralLink').value = `thesportsdugout.com/ref/${userCode}`;
+            document.getElementById('successModal').classList.remove('hidden');
+        }
+
+        function closeSuccess() {
+            document.getElementById('successModal').classList.add('hidden');
+        }
+
+        function copyLink() {
             const link = document.getElementById('userReferralLink');
             link.select();
             navigator.clipboard.writeText(link.value);
             event.target.textContent = 'COPIED!';
         }
 
-        // Live stats (simulated)
-        let memberCount = 1247;
-        let totalDeposits = 15600;
-        let currentLeader = 47;
-
-        setInterval(() => {
-            if (Math.random() > 0.7) {
-                memberCount += Math.floor(Math.random() * 3) + 1;
-                document.getElementById('memberCount').textContent = memberCount.toLocaleString();
-                totalDeposits += Math.floor(Math.random() * 50) + 10;
-                document.getElementById('validReferrals').textContent = '$' + totalDeposits.toLocaleString();
-                if (Math.random() > 0.9) {
-                    currentLeader += Math.floor(Math.random() * 2);
-                    document.getElementById('currentLeader').textContent = `${currentLeader} deposits`;
-                }
-            }
-        }, 15000);
+        // Test the button immediately
+        console.log('🚀 JavaScript loaded and ready!');
+        console.log('JOIN CONTEST button test:', document.querySelector('button[onclick="openSignup()"]'));
     </script>
 </body>
 </html>
