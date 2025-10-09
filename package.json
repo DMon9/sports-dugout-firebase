@@ -1,1 +1,5 @@
-{\n  \"engines\": {\n    \"node\": \"22\"\n  }\n}
+{
+  "engines": {
+    "node": "22"
+  }
+}
