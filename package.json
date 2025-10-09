@@ -1,5 +1,11 @@
 {
+  "name": "sports-dugout-firebase",
+  "version": "1.0.0",
   "engines": {
     "node": "22"
+  },
+  "dependencies": {
+    "stripe": "^14.10.0",
+    "firebase-admin": "^12.0.0"
   }
 }
