@@ -1,243 +1,186 @@
-const admin = require('firebase-admin');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
-// Initialize Firebase Admin (only once)
-if (!admin.apps.length) {
-  try {
-    const serviceAccount = {
-      type: "service_account",
-      project_id: process.env.FIREBASE_PROJECT_ID,
-      private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
-      private_key: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-      client_email: process.env.FIREBASE_CLIENT_EMAIL,
-      client_id: process.env.FIREBASE_CLIENT_ID,
-      auth_uri: "https://accounts.google.com/o/oauth2/auth",
-      token_uri: "https://oauth2.googleapis.com/token"
-    };
-
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount)
-    });
-    console.log('✅ Firebase Admin initialized successfully');
-  } catch (error) {
-    console.error('❌ Firebase initialization failed:', error);
+// Import database functions (only if Firebase is configured)
+let dbFunctions = null;
+try {
+  if (process.env.FIREBASE_PROJECT_ID) {
+    dbFunctions = require('./database');
   }
+} catch (error) {
+  console.log('Database not available:', error.message);
 }
 
-const db = admin.firestore();
-
-// Generate unique referral code
-function generateReferralCode() {
-  return 'TSD' + Math.random().toString(36).substr(2, 6).toUpperCase();
-}
-
-// Add contest entry to database
-async function addContestEntry(paymentData) {
+module.exports = async function handler(req, res) {
   try {
-    console.log('📝 Adding contest entry for:', paymentData.email);
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Stripe-Signature');
     
-    const referralCode = generateReferralCode();
-    const entry = {
-      email: paymentData.email,
-      paymentIntentId: paymentData.paymentIntentId,
-      amount: paymentData.amount, // Amount in cents
-      referralCode: referralCode,
-      referredBy: paymentData.referredBy || null,
-      referrals: 0,
-      status: 'active',
-      created: admin.firestore.FieldValue.serverTimestamp(),
-      lastUpdated: admin.firestore.FieldValue.serverTimestamp()
-    };
-    
-    // Add to contest_entries collection
-    const docRef = await db.collection('contest_entries').add(entry);
-    console.log('✅ Contest entry added with ID:', docRef.id);
-    
-    // Update referrer's count if this was a referral
-    if (paymentData.referredBy) {
-      await incrementReferralCount(paymentData.referredBy);
+    if (req.method === 'OPTIONS') {
+      res.status(200).end();
+      return;
     }
     
-    // Also store in payments collection for tracking
-    await db.collection('payments').doc(paymentData.paymentIntentId).set({
-      email: paymentData.email,
-      amount: paymentData.amount,
-      status: 'completed',
-      contestEntryId: docRef.id,
-      created: admin.firestore.FieldValue.serverTimestamp()
-    });
+    console.log('🔥 API Request:', req.method, req.url);
     
-    return { 
-      ...entry, 
-      id: docRef.id,
-      referralLink: `https://thesportsdugout.com/ref/${referralCode}`
-    };
-  } catch (error) {
-    console.error('❌ Error adding contest entry:', error);
-    throw error;
-  }
-}
-
-// Increment referral count for referrer
-async function incrementReferralCount(referralCode) {
-  try {
-    console.log('🔗 Incrementing referrals for code:', referralCode);
+    // Parse the URL to get query parameters
+    const url = new URL(req.url, `http://${req.headers.host}`);
+    const action = url.searchParams.get('action');
     
-    const snapshot = await db.collection('contest_entries')
-      .where('referralCode', '==', referralCode)
-      .limit(1)
-      .get();
-    
-    if (!snapshot.empty) {
-      const doc = snapshot.docs[0];
-      const currentReferrals = doc.data().referrals || 0;
-      
-      await doc.ref.update({
-        referrals: admin.firestore.FieldValue.increment(1),
-        lastUpdated: admin.firestore.FieldValue.serverTimestamp()
+    // Health check - main API endpoint
+    if (req.method === 'GET' && !action) {
+      res.status(200).json({
+        status: 'Sports Dugout API with Database Integration!',
+        timestamp: new Date().toISOString(),
+        stripe_configured: !!process.env.STRIPE_SECRET_KEY,
+        firebase_configured: !!(process.env.FIREBASE_PROJECT_ID && dbFunctions),
+        mode: process.env.STRIPE_SECRET_KEY?.includes('test') ? 'test' : 'live',
+        version: '3.1.0',
+        available_actions: ['stats', 'leaderboard']
       });
+      return;
+    }
+    
+    // Get real contest statistics
+    if (req.method === 'GET' && action === 'stats') {
+      console.log('📊 Stats requested');
+      if (dbFunctions) {
+        try {
+          const stats = await dbFunctions.getContestStats();
+          res.status(200).json({ success: true, data: stats });
+        } catch (error) {
+          console.error('Stats error:', error);
+          res.status(500).json({ error: 'Failed to fetch stats', message: error.message });
+        }
+      } else {
+        res.status(503).json({ error: 'Database not configured' });
+      }
+      return;
+    }
+    
+    // Get live leaderboard
+    if (req.method === 'GET' && action === 'leaderboard') {
+      console.log('🏆 Leaderboard requested');
+      if (dbFunctions) {
+        try {
+          const leaderboard = await dbFunctions.getLeaderboard(10);
+          res.status(200).json({ success: true, data: leaderboard });
+        } catch (error) {
+          console.error('Leaderboard error:', error);
+          res.status(500).json({ error: 'Failed to fetch leaderboard', message: error.message });
+        }
+      } else {
+        res.status(503).json({ error: 'Database not configured' });
+      }
+      return;
+    }
+    
+    // Create payment intent and immediately add to database when payment succeeds
+    if (req.method === 'POST') {
+      const { amount, currency = 'usd', email, referredBy, payment_intent_id } = req.body;
       
-      const newCount = currentReferrals + 1;
-      console.log('✅ Referral count updated:', referralCode, 'now has', newCount, 'referrals');
-      
-      // Check if they hit 1000 referrals (WINNER!)
-      if (newCount >= 1000) {
-        await markAsWinner(doc.id);
+      // Handle payment confirmation (when frontend confirms payment succeeded)
+      if (payment_intent_id && req.body.confirm_payment) {
+        console.log('🎉 Payment confirmation received:', payment_intent_id);
+        
+        if (dbFunctions) {
+          try {
+            // Add entry to contest database immediately
+            const contestEntry = await dbFunctions.addContestEntry({
+              email: email,
+              paymentIntentId: payment_intent_id,
+              amount: amount,
+              referredBy: referredBy || null
+            });
+            
+            console.log('✅ Contest entry created immediately:', contestEntry.referralCode);
+            
+            res.status(200).json({
+              success: true,
+              message: 'Contest entry added successfully',
+              referralCode: contestEntry.referralCode,
+              referralLink: contestEntry.referralLink
+            });
+            return;
+          } catch (dbError) {
+            console.error('❌ Database error:', dbError);
+            res.status(500).json({ error: 'Failed to add contest entry', message: dbError.message });
+            return;
+          }
+        } else {
+          res.status(503).json({ error: 'Database not configured' });
+          return;
+        }
       }
       
-      return newCount;
-    } else {
-      console.log('⚠️ Referral code not found:', referralCode);
-      return 0;
+      // Regular payment intent creation
+      console.log('💳 Payment request:', { amount, email, referredBy });
+      
+      // Validation
+      if (!amount || amount < 1000) {
+        return res.status(400).json({ error: 'Minimum amount is $10' });
+      }
+      
+      if (!email || !email.includes('@')) {
+        return res.status(400).json({ error: 'Valid email required' });
+      }
+      
+      // Check if email already entered (if database available)
+      if (dbFunctions) {
+        try {
+          const emailExists = await dbFunctions.isEmailAlreadyEntered(email);
+          if (emailExists) {
+            return res.status(400).json({ 
+              error: 'This email has already entered the contest',
+              code: 'email_already_exists'
+            });
+          }
+        } catch (dbError) {
+          console.error('Database check failed:', dbError);
+          // Continue with payment even if DB check fails
+        }
+      }
+      
+      if (!process.env.STRIPE_SECRET_KEY) {
+        return res.status(500).json({ error: 'Payment system not configured' });
+      }
+      
+      // Create Stripe payment intent
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: parseInt(amount),
+        currency: currency,
+        automatic_payment_methods: { enabled: true },
+        metadata: {
+          contest: 'sports_dugout_1000',
+          email: email,
+          referredBy: referredBy || '',
+          timestamp: new Date().toISOString()
+        },
+        receipt_email: email,
+        description: 'Sports Dugout Contest Entry (TEST)'
+      });
+      
+      console.log('✅ Payment intent created:', paymentIntent.id);
+      
+      res.status(200).json({
+        success: true,
+        client_secret: paymentIntent.client_secret,
+        payment_intent_id: paymentIntent.id
+      });
+      return;
     }
-  } catch (error) {
-    console.error('❌ Error incrementing referral count:', error);
-    return 0;
-  }
-}
-
-// Mark contest winner
-async function markAsWinner(entryId) {
-  try {
-    await db.collection('contest_entries').doc(entryId).update({
-      status: 'winner',
-      wonAt: admin.firestore.FieldValue.serverTimestamp()
+    
+    res.status(404).json({ 
+      error: 'Endpoint not found',
+      method: req.method,
+      url: req.url
     });
     
-    // Add to winners collection
-    await db.collection('winners').add({
-      contestEntryId: entryId,
-      prize: 1000,
-      currency: 'USD',
-      wonAt: admin.firestore.FieldValue.serverTimestamp(),
-      status: 'pending_payout'
+  } catch (error) {
+    console.error('❌ API Error:', error);
+    res.status(500).json({
+      error: 'Server error',
+      message: error.message
     });
-    
-    console.log('🏆 WINNER DETECTED! Entry ID:', entryId);
-    console.log('🎉 $1,000 PRIZE AWARDED!');
-  } catch (error) {
-    console.error('❌ Error marking winner:', error);
   }
-}
-
-// Get real-time contest statistics
-async function getContestStats() {
-  try {
-    console.log('📊 Fetching real contest statistics...');
-    
-    const snapshot = await db.collection('contest_entries').get();
-    const entries = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    
-    const totalUsers = entries.length;
-    const totalDeposits = entries.reduce((sum, entry) => sum + (entry.amount || 0), 0);
-    
-    // Find current leader
-    const sortedEntries = entries.sort((a, b) => (b.referrals || 0) - (a.referrals || 0));
-    const leader = sortedEntries[0];
-    
-    // Check for winner
-    const winner = entries.find(entry => entry.status === 'winner');
-    
-    const stats = {
-      totalUsers,
-      totalDeposits: Math.round(totalDeposits / 100), // Convert cents to dollars
-      currentLeader: leader?.referrals || 0,
-      leaderEmail: leader?.email?.substring(0, 3) + '***' || 'None',
-      hasWinner: !!winner,
-      winnerEmail: winner?.email?.substring(0, 3) + '***' || null,
-      lastUpdated: new Date().toISOString(),
-      averageDeposit: totalUsers > 0 ? Math.round((totalDeposits / 100) / totalUsers) : 0
-    };
-    
-    console.log('✅ Contest stats loaded:', stats);
-    return stats;
-  } catch (error) {
-    console.error('❌ Error getting contest stats:', error);
-    // Return fallback data if database fails
-    return {
-      totalUsers: 0,
-      totalDeposits: 0,
-      currentLeader: 0,
-      leaderEmail: 'None',
-      hasWinner: false,
-      winnerEmail: null,
-      lastUpdated: new Date().toISOString(),
-      averageDeposit: 0
-    };
-  }
-}
-
-// Get live leaderboard
-async function getLeaderboard(limit = 10) {
-  try {
-    console.log('🏆 Fetching live leaderboard...');
-    
-    const snapshot = await db.collection('contest_entries')
-      .where('referrals', '>', 0)
-      .orderBy('referrals', 'desc')
-      .orderBy('created', 'asc') // Tie-breaker: earlier entry wins
-      .limit(limit)
-      .get();
-    
-    const leaderboard = snapshot.docs.map((doc, index) => {
-      const data = doc.data();
-      return {
-        rank: index + 1,
-        email: data.email?.substring(0, 3) + '***' || 'Anonymous',
-        referrals: data.referrals || 0,
-        referralCode: data.referralCode,
-        status: data.status,
-        joinedDate: data.created?.toDate()?.toLocaleDateString() || 'Recently'
-      };
-    });
-    
-    console.log('✅ Leaderboard loaded:', leaderboard.length, 'entries');
-    return leaderboard;
-  } catch (error) {
-    console.error('❌ Error getting leaderboard:', error);
-    return [];
-  }
-}
-
-// Check if email already entered
-async function isEmailAlreadyEntered(email) {
-  try {
-    const snapshot = await db.collection('contest_entries')
-      .where('email', '==', email.toLowerCase())
-      .limit(1)
-      .get();
-    
-    return !snapshot.empty;
-  } catch (error) {
-    console.error('❌ Error checking email:', error);
-    return false;
-  }
-}
-
-module.exports = {
-  addContestEntry,
-  incrementReferralCount,
-  getContestStats,
-  getLeaderboard,
-  isEmailAlreadyEntered,
-  markAsWinner
 };
