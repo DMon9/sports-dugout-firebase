@@ -21,27 +21,37 @@ module.exports = async function handler(req, res) {
       return;
     }
     
-    const { pathname } = new URL(req.url || '', `http://${req.headers.host}`);
-    console.log('🔥 API Request:', req.method, pathname);
+    console.log('🔥 API Request:', req.method, req.url);
     
-    // Health check
-    if (req.method === 'GET' && pathname === '/api') {
+    // Parse the URL to get query parameters
+    const url = new URL(req.url, `http://${req.headers.host}`);
+    const action = url.searchParams.get('action');
+    
+    // Health check - main API endpoint
+    if (req.method === 'GET' && !action) {
       res.status(200).json({
         status: 'Sports Dugout API with Database Integration!',
         timestamp: new Date().toISOString(),
         stripe_configured: !!process.env.STRIPE_SECRET_KEY,
         firebase_configured: !!(process.env.FIREBASE_PROJECT_ID && dbFunctions),
         mode: process.env.STRIPE_SECRET_KEY?.includes('test') ? 'test' : 'live',
-        version: '3.0.0'
+        version: '3.0.0',
+        available_actions: ['stats', 'leaderboard']
       });
       return;
     }
     
     // Get real contest statistics
-    if (req.method === 'GET' && pathname === '/api/stats') {
+    if (req.method === 'GET' && action === 'stats') {
+      console.log('📊 Stats requested');
       if (dbFunctions) {
-        const stats = await dbFunctions.getContestStats();
-        res.status(200).json({ success: true, data: stats });
+        try {
+          const stats = await dbFunctions.getContestStats();
+          res.status(200).json({ success: true, data: stats });
+        } catch (error) {
+          console.error('Stats error:', error);
+          res.status(500).json({ error: 'Failed to fetch stats', message: error.message });
+        }
       } else {
         res.status(503).json({ error: 'Database not configured' });
       }
@@ -49,10 +59,16 @@ module.exports = async function handler(req, res) {
     }
     
     // Get live leaderboard
-    if (req.method === 'GET' && pathname === '/api/leaderboard') {
+    if (req.method === 'GET' && action === 'leaderboard') {
+      console.log('🏆 Leaderboard requested');
       if (dbFunctions) {
-        const leaderboard = await dbFunctions.getLeaderboard(10);
-        res.status(200).json({ success: true, data: leaderboard });
+        try {
+          const leaderboard = await dbFunctions.getLeaderboard(10);
+          res.status(200).json({ success: true, data: leaderboard });
+        } catch (error) {
+          console.error('Leaderboard error:', error);
+          res.status(500).json({ error: 'Failed to fetch leaderboard', message: error.message });
+        }
       } else {
         res.status(503).json({ error: 'Database not configured' });
       }
@@ -60,7 +76,7 @@ module.exports = async function handler(req, res) {
     }
     
     // Create payment intent with database integration
-    if (req.method === 'POST' && pathname === '/api') {
+    if (req.method === 'POST') {
       const { amount, currency = 'usd', email, referredBy } = req.body;
       
       console.log('💳 Payment request:', { amount, email, referredBy });
@@ -76,12 +92,17 @@ module.exports = async function handler(req, res) {
       
       // Check if email already entered (if database available)
       if (dbFunctions) {
-        const emailExists = await dbFunctions.isEmailAlreadyEntered(email);
-        if (emailExists) {
-          return res.status(400).json({ 
-            error: 'This email has already entered the contest',
-            code: 'email_already_exists'
-          });
+        try {
+          const emailExists = await dbFunctions.isEmailAlreadyEntered(email);
+          if (emailExists) {
+            return res.status(400).json({ 
+              error: 'This email has already entered the contest',
+              code: 'email_already_exists'
+            });
+          }
+        } catch (dbError) {
+          console.error('Database check failed:', dbError);
+          // Continue with payment even if DB check fails
         }
       }
       
@@ -114,52 +135,17 @@ module.exports = async function handler(req, res) {
       return;
     }
     
-    // Webhook for completed payments
-    if (req.method === 'POST' && pathname === '/api/webhook') {
-      const sig = req.headers['stripe-signature'];
-      let event;
-      
-      try {
-        event = stripe.webhooks.constructEvent(
-          req.body, 
-          sig, 
-          process.env.STRIPE_WEBHOOK_SECRET
-        );
-        console.log('✅ Webhook verified:', event.type);
-      } catch (err) {
-        console.error('❌ Webhook verification failed:', err.message);
-        return res.status(400).send(`Webhook Error: ${err.message}`);
-      }
-      
-      // Handle successful payment
-      if (event.type === 'payment_intent.succeeded') {
-        const paymentIntent = event.data.object;
-        
-        console.log('🎉 Payment succeeded, adding to database:', paymentIntent.id);
-        
-        if (dbFunctions) {
-          try {
-            // Add entry to contest database
-            const contestEntry = await dbFunctions.addContestEntry({
-              email: paymentIntent.metadata.email,
-              paymentIntentId: paymentIntent.id,
-              amount: paymentIntent.amount,
-              referredBy: paymentIntent.metadata.referredBy || null
-            });
-            
-            console.log('✅ Contest entry created with referral code:', contestEntry.referralCode);
-          } catch (dbError) {
-            console.error('❌ Database error after successful payment:', dbError);
-            // Payment succeeded but database failed - needs manual intervention
-          }
-        }
-      }
-      
-      res.status(200).json({ received: true });
-      return;
-    }
-    
-    res.status(404).json({ error: 'Endpoint not found' });
+    res.status(404).json({ 
+      error: 'Endpoint not found',
+      method: req.method,
+      url: req.url,
+      available_endpoints: [
+        'GET /api - Health check',
+        'GET /api?action=stats - Contest statistics',
+        'GET /api?action=leaderboard - Leaderboard',
+        'POST /api - Create payment'
+      ]
+    });
     
   } catch (error) {
     console.error('❌ API Error:', error);
