@@ -342,6 +342,9 @@
             button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>PROCESSING...';
             
             try {
+                console.log('💳 Creating payment intent...');
+                
+                // Step 1: Create payment intent
                 const response = await fetch('/api', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -358,6 +361,9 @@
                     throw new Error(data.error || 'Payment setup failed');
                 }
                 
+                console.log('🔄 Confirming payment with Stripe...');
+                
+                // Step 2: Confirm payment with Stripe
                 const { error, paymentIntent } = await stripe.confirmCardPayment(data.client_secret, {
                     payment_method: {
                         card: cardElement,
@@ -369,13 +375,40 @@
                     throw new Error(error.message);
                 } else {
                     console.log('✅ Payment succeeded:', paymentIntent.id);
-                    showSuccess();
                     
-                    // Refresh real data after successful payment
-                    setTimeout(() => {
-                        updateRealStats();
-                        fetchLeaderboard();
-                    }, 2000);
+                    // Step 3: Confirm payment success with our API to add to database
+                    console.log('📝 Adding contest entry to database...');
+                    
+                    const confirmResponse = await fetch('/api', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            confirm_payment: true,
+                            payment_intent_id: paymentIntent.id,
+                            email: email,
+                            amount: Math.round(amount * 100)
+                        })
+                    });
+                    
+                    const confirmData = await confirmResponse.json();
+                    
+                    if (confirmResponse.ok && confirmData.success) {
+                        console.log('✅ Contest entry added:', confirmData.referralCode);
+                        
+                        // Show success with real referral code
+                        showSuccess(confirmData.referralLink || confirmData.referralCode);
+                        
+                        // Refresh stats immediately and again after a delay
+                        console.log('🔄 Refreshing contest stats...');
+                        setTimeout(updateRealStats, 1000);  // 1 second delay
+                        setTimeout(updateRealStats, 3000);  // 3 second delay
+                        setTimeout(fetchLeaderboard, 2000); // 2 second delay
+                    } else {
+                        console.error('❌ Failed to add contest entry:', confirmData.error);
+                        // Still show success since payment worked
+                        showSuccess();
+                        setTimeout(updateRealStats, 2000);
+                    }
                 }
                 
             } catch (error) {
@@ -387,10 +420,16 @@
             button.innerHTML = '<i class="fas fa-lock mr-2"></i>SECURE DEPOSIT (TEST)';
         }
 
-        function showSuccess() {
+        function showSuccess(referralLink) {
             closeDeposit();
-            const userCode = 'TSD' + Math.random().toString(36).substr(2, 6).toUpperCase();
-            document.getElementById('userReferralLink').value = `thesportsdugout.com/ref/${userCode}`;
+            
+            if (referralLink) {
+                document.getElementById('userReferralLink').value = referralLink;
+            } else {
+                const userCode = 'TSD' + Math.random().toString(36).substring(2, 8).toUpperCase();
+                document.getElementById('userReferralLink').value = `thesportsdugout.com/ref/${userCode}`;
+            }
+            
             document.getElementById('successModal').classList.remove('hidden');
         }
 
