@@ -4,7 +4,7 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 let dbFunctions = null;
 try {
   if (process.env.FIREBASE_PROJECT_ID) {
-    dbFunctions = require('./database');
+    dbFunctions = require('./db-functions');
   }
 } catch (error) {
   console.log('Database not available:', error.message);
