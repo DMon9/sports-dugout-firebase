@@ -1,7 +1,5 @@
 module.exports = async function handler(req, res) {
   try {
-    console.log('Testing Stripe import...');
-    
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Content-Type', 'application/json');
     
@@ -10,23 +8,40 @@ module.exports = async function handler(req, res) {
       return;
     }
     
-    // Test Stripe import
-    const stripe = require('stripe');
-    console.log('✅ Stripe module imported successfully');
+    console.log('Initializing Stripe...');
     
-    res.status(200).json({
-      message: 'API working with Stripe import!',
-      method: req.method,
-      stripe_module_loaded: true,
-      timestamp: new Date().toISOString()
-    });
+    // Initialize Stripe with environment variable
+    const stripeKey = process.env.STRIPE_SECRET_KEY;
+    console.log('Stripe key exists:', !!stripeKey);
+    
+    if (!stripeKey) {
+      return res.status(500).json({
+        error: 'Stripe secret key not configured',
+        step: 'stripe_key_check'
+      });
+    }
+    
+    const stripe = require('stripe')(stripeKey);
+    console.log('✅ Stripe initialized successfully');
+    
+    if (req.method === 'GET') {
+      res.status(200).json({
+        status: 'Sports Dugout API Working!',
+        timestamp: new Date().toISOString(),
+        stripe_configured: true,
+        mode: stripeKey.includes('test') ? 'test' : 'live'
+      });
+      return;
+    }
+    
+    res.status(200).json({ message: 'API working with Stripe!' });
     
   } catch (error) {
     console.error('❌ Error:', error);
     res.status(500).json({
       error: 'Function error',
       message: error.message,
-      step: 'stripe_import_test'
+      step: 'stripe_initialization'
     });
   }
 };
