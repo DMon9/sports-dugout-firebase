@@ -102,7 +102,7 @@ async function getLeaderboard(limit = 10) {
 async function addContestEntry({ email, paymentIntentId, amount, referredBy }) {
   try {
     // Generate unique referral code
-    const referralCode = 'TSD' + Math.random().toString(36).substr(2, 6).toUpperCase();
+    const referralCode = 'TSD' + Math.random().toString(36).substring(2, 8).toUpperCase();
     const referralLink = `https://thesportsdugout.com/ref/${referralCode}`;
     
     // Create contest entry
