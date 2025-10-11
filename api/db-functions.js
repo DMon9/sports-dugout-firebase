@@ -169,14 +169,64 @@ async function incrementReferralCount(referralCode) {
     
     if (!snapshot.empty) {
       const doc = snapshot.docs[0];
+      const currentReferrals = doc.data().referrals || 0;
+      
       await doc.ref.update({
-        referrals: admin.firestore.FieldValue.increment(1)
+        referrals: admin.firestore.FieldValue.increment(1),
+        lastUpdated: admin.firestore.FieldValue.serverTimestamp()
       });
-      console.log('✅ Incremented referral count for:', referralCode);
+      
+      const newCount = currentReferrals + 1;
+      console.log('✅ Incremented referral count for:', referralCode, 'now has', newCount);
+      
+      // Check for winner at 1000 referrals
+      if (newCount >= 1000) {
+        await markAsWinner(doc.id);
+      }
+      
+      return newCount;
     }
+    return 0;
   } catch (error) {
     console.error('Error incrementing referral count:', error);
     // Don't throw - this is not critical
+    return 0;
+  }
+}
+
+/**
+ * Find entry by referral code
+ */
+async function findEntryByReferralCode(referralCode) {
+  try {
+    const snapshot = await db.collection('contest_entries')
+      .where('referralCode', '==', referralCode)
+      .limit(1)
+      .get();
+    
+    if (!snapshot.empty) {
+      const doc = snapshot.docs[0];
+      return { id: doc.id, ...doc.data() };
+    }
+    return null;
+  } catch (error) {
+    console.error('Error finding entry by referral code:', error);
+    return null;
+  }
+}
+
+/**
+ * Mark contest winner
+ */
+async function markAsWinner(entryId) {
+  try {
+    await db.collection('contest_entries').doc(entryId).update({
+      status: 'winner',
+      wonAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+    console.log('🏆 WINNER DETECTED! Entry ID:', entryId);
+  } catch (error) {
+    console.error('Error marking winner:', error);
   }
 }
 
@@ -184,5 +234,8 @@ module.exports = {
   getContestStats,
   getLeaderboard,
   addContestEntry,
-  isEmailAlreadyEntered
+  isEmailAlreadyEntered,
+  incrementReferralCount,
+  findEntryByReferralCode,
+  markAsWinner
 };

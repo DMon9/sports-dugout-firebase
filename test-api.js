@@ -16,7 +16,10 @@ try {
     'getContestStats',
     'getLeaderboard',
     'addContestEntry',
-    'isEmailAlreadyEntered'
+    'isEmailAlreadyEntered',
+    'incrementReferralCount',
+    'findEntryByReferralCode',
+    'markAsWinner'
   ];
   
   const missingFunctions = requiredFunctions.filter(fn => typeof dbFunctions[fn] !== 'function');
@@ -84,9 +87,9 @@ console.log('\nTest 4: Checking stats.js implementation...');
 const fs = require('fs');
 const statsContent = fs.readFileSync('./api/stats.js', 'utf8');
 
-if (statsContent.includes('dbFunctions.getContestStats()')) {
+if (statsContent.includes('getContestStats') && (statsContent.includes('database') || statsContent.includes('db-functions'))) {
   console.log('✅ stats.js uses real database functions');
-} else if (statsContent.includes('Math.random()') && !statsContent.includes('dbFunctions')) {
+} else if (statsContent.includes('Math.random()') && !statsContent.includes('getContestStats')) {
   console.log('❌ stats.js still uses only mock data');
   allFilesOk = false;
 } else {

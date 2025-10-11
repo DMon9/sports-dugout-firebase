@@ -28,12 +28,13 @@ module.exports = async function handler(req, res) {
     // Health check
     if (req.method === 'GET' && !action) {
       res.status(200).json({
-        status: 'Sports Dugout API with Database Integration!',
+        status: 'Sports Dugout API with Full Referral Support!',
         timestamp: new Date().toISOString(),
         stripe_configured: !!process.env.STRIPE_SECRET_KEY,
         firebase_configured: !!dbFunctions,
         mode: process.env.STRIPE_SECRET_KEY?.includes('test') ? 'test' : 'live',
-        version: '3.2.0'
+        version: '3.3.0',
+        features: ['stats', 'leaderboard', 'referral_validation', 'payment_processing']
       });
       return;
     }
@@ -116,6 +117,59 @@ module.exports = async function handler(req, res) {
           success: true, 
           data: [],
           source: 'mock'
+        });
+      }
+      return;
+    }
+    
+    // Validate referral code
+    if (req.method === 'GET' && action === 'validate_referral') {
+      const referralCode = url.searchParams.get('code');
+      
+      console.log('🔗 Validating referral code:', referralCode);
+      
+      if (!referralCode) {
+        return res.status(400).json({ 
+          success: false, 
+          error: 'Referral code is required' 
+        });
+      }
+      
+      if (dbFunctions) {
+        try {
+          const referrer = await dbFunctions.findEntryByReferralCode(referralCode);
+          
+          if (referrer) {
+            res.status(200).json({ 
+              success: true, 
+              valid: true,
+              referrerEmail: referrer.email?.substring(0, 3) + '***',
+              referrals: referrer.referrals || 0,
+              source: 'database'
+            });
+          } else {
+            res.status(200).json({ 
+              success: true, 
+              valid: false,
+              message: 'Referral code not found',
+              source: 'database'
+            });
+          }
+        } catch (error) {
+          console.error('❌ Database validation error:', error.message);
+          res.status(200).json({ 
+            success: true, 
+            valid: false,
+            source: 'fallback',
+            error: 'Database temporarily unavailable'
+          });
+        }
+      } else {
+        res.status(200).json({ 
+          success: true, 
+          valid: false,
+          source: 'mock',
+          message: 'Database not configured'
         });
       }
       return;
