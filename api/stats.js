@@ -1,13 +1,3 @@
-// Import database functions (only if Firebase is configured)
-let dbFunctions = null;
-try {
-  if (process.env.FIREBASE_PROJECT_ID) {
-    dbFunctions = require('./db-functions');
-  }
-} catch (error) {
-  console.log('Database not available:', error.message);
-}
-
 module.exports = async function handler(req, res) {
   try {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -17,44 +7,68 @@ module.exports = async function handler(req, res) {
       return res.status(405).json({ error: 'Method not allowed' });
     }
     
-    console.log('📊 Stats endpoint called directly');
+    console.log('📊 Stats endpoint called');
     
-    // Use real database data if available
-    if (dbFunctions) {
+    // Check if Firebase is configured
+    const firebaseConfigured = !!(
+      process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON || 
+      (process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_CLIENT_EMAIL)
+    );
+    
+    console.log('Firebase configured:', firebaseConfigured);
+    console.log('Environment variables present:', {
+      hasJSON: !!process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON,
+      hasProjectId: !!process.env.FIREBASE_PROJECT_ID,
+      hasClientEmail: !!process.env.FIREBASE_CLIENT_EMAIL
+    });
+    
+    if (firebaseConfigured) {
+      // Try to use real database
       try {
-        const stats = await dbFunctions.getContestStats();
-        
-        console.log('✅ Returning real stats:', stats);
+        const { getContestStats } = require('./database');
+        const stats = await getContestStats();
         
         res.status(200).json({ 
           success: true, 
           data: stats,
-          source: 'database',
-          timestamp: new Date().toISOString()
+          source: 'firebase'
         });
       } catch (dbError) {
-        console.error('Database error:', dbError);
-        // Fall back to mock data if database fails
-        throw dbError;
+        console.error('Database error:', dbError.message);
+        
+        // Fall back to mock data
+        const mockStats = {
+          totalUsers: 0,
+          totalDeposits: 0,
+          currentLeader: 0,
+          leaderEmail: 'None',
+          hasWinner: false,
+          lastUpdated: new Date().toISOString()
+        };
+        
+        res.status(200).json({ 
+          success: true, 
+          data: mockStats,
+          source: 'fallback',
+          error: dbError.message
+        });
       }
     } else {
-      // Return simple mock data if database not configured
-      const stats = {
-        totalUsers: 0,
-        totalDeposits: 0,
-        currentLeader: 0,
-        leaderEmail: 'None',
+      // Return mock data if not configured
+      const mockStats = {
+        totalUsers: Math.floor(Math.random() * 10) + 1,
+        totalDeposits: Math.floor(Math.random() * 100) + 50,
+        currentLeader: Math.floor(Math.random() * 5),
+        leaderEmail: 'tes***',
         hasWinner: false,
         lastUpdated: new Date().toISOString()
       };
       
-      console.log('⚠️ Returning mock stats (database not configured):', stats);
-      
       res.status(200).json({ 
         success: true, 
-        data: stats,
-        source: 'mock_data',
-        timestamp: new Date().toISOString()
+        data: mockStats,
+        source: 'mock',
+        note: 'Firebase not configured - showing sample data'
       });
     }
     
