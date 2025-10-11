@@ -38,6 +38,14 @@ npm run deploy:production
 npm run deploy:development
 ```
 
+### Setup Verification
+
+Verify your repository is correctly configured for Cloudflare Workers:
+
+```bash
+npm run verify:setup
+```
+
 ### Testing
 
 Verify all endpoints are working:
