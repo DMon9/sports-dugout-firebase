@@ -38,10 +38,26 @@ npm run deploy:production
 npm run deploy:development
 ```
 
+### Testing
+
+Verify all endpoints are working:
+
+```bash
+# Test local development
+npm run verify
+
+# Test deployed worker
+npm run verify https://your-worker-url.workers.dev
+```
+
 ## Documentation
 
-- **[MIGRATION-SUMMARY.md](MIGRATION-SUMMARY.md)** - ⭐ Migration overview and quick start
-- **[CLOUDFLARE-DEPLOYMENT.md](CLOUDFLARE-DEPLOYMENT.md)** - Complete deployment guide and troubleshooting
+### Migration Guides
+- **[MIGRATION-SUMMARY.md](MIGRATION-SUMMARY.md)** - ⭐ Quick migration overview
+- **[MIGRATION-VISUAL-GUIDE.md](MIGRATION-VISUAL-GUIDE.md)** - 📊 Visual diagrams and comparisons
+- **[CLOUDFLARE-DEPLOYMENT.md](CLOUDFLARE-DEPLOYMENT.md)** - 🚀 Detailed deployment guide
+
+### API & Development
 - **[API-DOCUMENTATION.md](API-DOCUMENTATION.md)** - API reference with all endpoints
 - **[USAGE-EXAMPLES.md](USAGE-EXAMPLES.md)** - Frontend integration examples
 - **[IMPLEMENTATION-GUIDE.md](IMPLEMENTATION-GUIDE.md)** - Architecture and technical details
