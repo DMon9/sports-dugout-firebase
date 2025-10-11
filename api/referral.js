@@ -1,7 +1,7 @@
 // Import database functions
 let dbFunctions = null;
 try {
-  dbFunctions = require('./database');
+  dbFunctions = require('../lib/database');
 } catch (error) {
   console.log('Database not available:', error.message);
 }

@@ -3,7 +3,7 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 // Import database functions with error handling
 let dbFunctions = null;
 try {
-  dbFunctions = require('./database');
+  dbFunctions = require('../lib/database');
   console.log('✅ Database module loaded successfully');
 } catch (error) {
   console.error('❌ Database module failed to load:', error.message);

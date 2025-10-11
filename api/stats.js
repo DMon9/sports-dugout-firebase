@@ -25,7 +25,7 @@ module.exports = async function handler(req, res) {
     if (firebaseConfigured) {
       // Try to use real database
       try {
-        const { getContestStats } = require('./database');
+        const { getContestStats } = require('../lib/database');
         const stats = await getContestStats();
         
         res.status(200).json({ 

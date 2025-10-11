@@ -1,7 +1,7 @@
 const { 
   getContestStats, 
   getLeaderboard 
-} = require('./db-functions');
+} = require('../lib/db-functions');
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');

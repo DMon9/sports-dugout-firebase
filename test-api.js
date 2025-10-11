@@ -10,7 +10,7 @@ console.log('🧪 Starting API endpoint tests...\n');
 // Test 1: Verify db-functions.js exports
 console.log('Test 1: Checking db-functions.js exports...');
 try {
-  const dbFunctions = require('./api/db-functions.js');
+  const dbFunctions = require('./lib/db-functions.js');
   
   const requiredFunctions = [
     'getContestStats',
@@ -39,9 +39,9 @@ try {
 console.log('\nTest 2: Checking API files can be loaded...');
 const apiFiles = [
   './api/index.js',
-  './api/database.js',
   './api/stats.js',
-  './api/contest.js'
+  './api/contest.js',
+  './lib/database.js'
 ];
 
 let allFilesOk = true;
@@ -64,11 +64,11 @@ console.log('\nTest 3: Checking for circular dependencies...');
 try {
   // Clear the require cache to test fresh imports
   delete require.cache[require.resolve('./api/index.js')];
-  delete require.cache[require.resolve('./api/database.js')];
-  delete require.cache[require.resolve('./api/db-functions.js')];
+  delete require.cache[require.resolve('./lib/database.js')];
+  delete require.cache[require.resolve('./lib/db-functions.js')];
   
   require('./api/index.js');
-  require('./api/database.js');
+  require('./lib/database.js');
   
   console.log('✅ No circular dependency detected');
 } catch (error) {
