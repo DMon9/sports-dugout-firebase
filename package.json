@@ -1,11 +1,24 @@
 {
   "name": "sports-dugout-contest",
   "version": "1.0.0",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "deploy:production": "wrangler deploy --env production",
+    "deploy:development": "wrangler deploy --env development",
+    "cf-typegen": "wrangler types",
+    "verify": "node verify-migration.js",
+    "verify:remote": "node verify-migration.js"
+  },
   "dependencies": {
     "axios": "^1.12.2",
     "bcryptjs": "^3.0.2",
     "firebase-admin": "^12.0.0",
     "jsonwebtoken": "^9.0.2",
     "stripe": "^14.10.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20251011.0",
+    "wrangler": "^4.42.2"
   }
 }

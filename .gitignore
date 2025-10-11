@@ -9,6 +9,11 @@ firestore-debug.log
 # Environment variables
 .env
 .env.local
+.dev.vars
+
+# Cloudflare Workers
+.wrangler/
+worker-configuration.d.ts
 
 # Build outputs
 dist/

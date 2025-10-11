@@ -18,7 +18,7 @@ The implementation adds two major feature sets:
                  │ HTTP Requests
                  │
 ┌────────────────▼────────────────────────────────────────────┐
-│                    Vercel Serverless Functions              │
+│                   Cloudflare Workers Runtime                │
 │                                                              │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
 │  │  /api/users  │  │ /api/sports  │  │  /api/index  │     │
@@ -202,7 +202,7 @@ npm install jsonwebtoken bcryptjs axios
 
 ### 2. Environment Variables
 
-Add to your environment (Vercel, .env, etc.):
+Add to your Cloudflare Workers environment (see [CLOUDFLARE-DEPLOYMENT.md](CLOUDFLARE-DEPLOYMENT.md)):
 
 ```bash
 # Required - JWT Secret (change in production!)
@@ -249,14 +249,24 @@ service cloud.firestore {
 
 Note: Since we're using Firebase Admin SDK with service account, these rules are more for client-side Firebase SDK if you add it later.
 
-### 4. Deploy to Vercel
+### 4. Deploy to Cloudflare Workers
 
-The new files are already in the correct `/api` directory structure:
+The application uses Cloudflare Workers for deployment:
+
+```bash
+# Deploy to production
+npm run deploy:production
+
+# Deploy to development
+npm run deploy:development
+```
+
+The worker entry point (`src/index.js`) routes requests to the appropriate API handlers:
 - `/api/auth.js` - Authentication module
 - `/api/users.js` - User API endpoints
 - `/api/sports.js` - Sports data endpoints
 
-Vercel will automatically deploy these as serverless functions.
+See [CLOUDFLARE-DEPLOYMENT.md](CLOUDFLARE-DEPLOYMENT.md) for complete deployment instructions.
 
 ## Testing
 
@@ -458,7 +468,7 @@ async function registerUser(email, password, firstName, lastName) {
 - Rate limiting recommended (not implemented yet)
 
 ### 5. Best Practices
-- Use HTTPS in production (automatic with Vercel)
+- Use HTTPS in production (automatic with Cloudflare Workers)
 - Rotate JWT secret regularly
 - Implement password reset flow
 - Add email verification
@@ -614,4 +624,4 @@ This implementation provides a complete foundation for:
 3. Sports data integration
 4. Scalable architecture
 
-The system is production-ready with proper security, error handling, and documentation. All endpoints are deployed as Vercel serverless functions and integrate seamlessly with the existing contest system.
+The system is production-ready with proper security, error handling, and documentation. All endpoints are deployed as Cloudflare Workers and integrate seamlessly with the existing contest system. See [CLOUDFLARE-DEPLOYMENT.md](CLOUDFLARE-DEPLOYMENT.md) for deployment instructions.

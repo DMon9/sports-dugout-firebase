@@ -197,13 +197,23 @@ FIREBASE_PROJECT_ID=your-project-id
 STRIPE_SECRET_KEY=sk_...
 ```
 
-### Deploy to Vercel
+### Deploy to Cloudflare Workers
 
-The new API files are automatically deployed as serverless functions:
-- `/api/users.js` → `https://your-domain.vercel.app/api/users`
-- `/api/sports.js` → `https://your-domain.vercel.app/api/sports`
+The application is now deployed using Cloudflare Workers for better performance and global distribution:
 
-No additional configuration needed!
+```bash
+# Deploy to production
+npm run deploy:production
+
+# Deploy to development
+npm run deploy:development
+```
+
+**API URLs:**
+- `/api/users.js` → `https://sports-dugout-firebase.your-subdomain.workers.dev/api/users`
+- `/api/sports.js` → `https://sports-dugout-firebase.your-subdomain.workers.dev/api/sports`
+
+See [CLOUDFLARE-DEPLOYMENT.md](CLOUDFLARE-DEPLOYMENT.md) for complete deployment instructions.
 
 ## ✅ Testing
 
@@ -263,13 +273,14 @@ All existing contest functionality remains unchanged!
 | **API-DOCUMENTATION.md** | Complete API reference with all endpoints |
 | **USAGE-EXAMPLES.md** | Frontend integration examples (JavaScript, React, Vue) |
 | **IMPLEMENTATION-GUIDE.md** | Architecture, deployment, and technical details |
+| **CLOUDFLARE-DEPLOYMENT.md** | Cloudflare Workers deployment guide and migration |
 | **test-new-features.js** | Testing and validation script |
 
 ## 🎯 Next Steps
 
 ### Immediate
-1. Set `JWT_SECRET` environment variable
-2. Deploy to Vercel
+1. Set `JWT_SECRET` environment variable in Cloudflare
+2. Deploy to Cloudflare Workers
 3. Test endpoints
 4. Integrate frontend
 
