@@ -188,11 +188,31 @@ async function isEmailAlreadyEntered(email) {
   }
 }
 
+// Find entry by referral code
+async function findEntryByReferralCode(referralCode) {
+  try {
+    const snapshot = await db.collection('contest_entries')
+      .where('referralCode', '==', referralCode)
+      .limit(1)
+      .get();
+    
+    if (!snapshot.empty) {
+      const doc = snapshot.docs[0];
+      return { id: doc.id, ...doc.data() };
+    }
+    return null;
+  } catch (error) {
+    console.error('❌ Error finding entry by referral code:', error);
+    return null;
+  }
+}
+
 module.exports = {
   addContestEntry,
   incrementReferralCount,
   getContestStats,
   getLeaderboard,
   isEmailAlreadyEntered,
-  markAsWinner
+  markAsWinner,
+  findEntryByReferralCode
 };
