@@ -6,7 +6,9 @@
     "deploy": "wrangler deploy",
     "deploy:production": "wrangler deploy --env production",
     "deploy:development": "wrangler deploy --env development",
-    "cf-typegen": "wrangler types"
+    "cf-typegen": "wrangler types",
+    "verify": "node verify-migration.js",
+    "verify:remote": "node verify-migration.js"
   },
   "dependencies": {
     "axios": "^1.12.2",

@@ -187,7 +187,7 @@ Access analytics in the Cloudflare Dashboard:
 ### Module Resolution Issues
 
 If you encounter `Cannot find module` errors:
-- Ensure `node_compat = true` is set in `wrangler.toml`
+- Ensure `compatibility_flags = ["nodejs_compat"]` is set in `wrangler.toml`
 - Check that all dependencies are in `package.json`
 - Try clearing the wrangler cache: `wrangler dev --force`
 
