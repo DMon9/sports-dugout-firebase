@@ -84,7 +84,9 @@ npm run dev
 
 This starts a local server at `http://localhost:8787`
 
-### Deploy to Development Environment
+### Manual Deployment
+
+#### Deploy to Development Environment
 
 ```bash
 npm run deploy:development
@@ -92,7 +94,7 @@ npm run deploy:development
 
 This deploys to: `sports-dugout-firebase-dev.your-subdomain.workers.dev`
 
-### Deploy to Production
+#### Deploy to Production
 
 ```bash
 npm run deploy:production
@@ -100,11 +102,38 @@ npm run deploy:production
 
 This deploys to: `sports-dugout-firebase.your-subdomain.workers.dev`
 
-### Quick Deploy (uses default config)
+#### Quick Deploy (uses default config)
 
 ```bash
 npm run deploy
 ```
+
+### Automated Deployment (CI/CD)
+
+**New!** GitHub Actions workflows are now included for automated deployments.
+
+#### Setup
+
+1. **Add GitHub Secrets** (required for automated deployment):
+   - Go to your repository → Settings → Secrets and variables → Actions
+   - Add the following secrets:
+     - `CLOUDFLARE_API_TOKEN` - Create from Cloudflare Dashboard → My Profile → API Tokens
+     - `CLOUDFLARE_ACCOUNT_ID` - Found in Workers & Pages dashboard
+
+2. **Workflows**:
+   - **Production**: Automatically deploys when pushing to `main` branch
+   - **Development**: Automatically deploys when pushing to `develop` or `dev` branch
+   - Both can also be triggered manually from the Actions tab
+
+For detailed setup instructions, see [`.github/workflows/README.md`](.github/workflows/README.md)
+
+#### Verifying wrangler.toml
+
+The workflows include a verification step that ensures `wrangler.toml` exists before deployment. If you see "wrangler.toml not found" errors:
+
+1. Ensure the file is in the repository root
+2. Ensure it's committed to git: `git add wrangler.toml && git commit -m "Add wrangler config"`
+3. Check that it's not in `.gitignore`
 
 ## Custom Domain Setup
 
@@ -204,6 +233,41 @@ Access analytics in the Cloudflare Dashboard:
 - Errors
 
 ## Troubleshooting
+
+### wrangler.toml Not Found
+
+This is a common error during deployment. **Solutions**:
+
+1. **Verify file exists**:
+   ```bash
+   ls -la wrangler.toml
+   ```
+
+2. **Check if file is tracked by git**:
+   ```bash
+   git ls-files | grep wrangler.toml
+   ```
+   If not listed, add it:
+   ```bash
+   git add wrangler.toml
+   git commit -m "Add wrangler.toml configuration"
+   git push
+   ```
+
+3. **Ensure correct working directory**:
+   - The file must be in the repository root
+   - If using CI/CD, ensure the workflow runs from the root directory
+   - Check that deployment commands run from where `wrangler.toml` exists
+
+4. **Using Cloudflare Pages instead of Workers?**:
+   - This project is designed for **Cloudflare Workers**, not Pages
+   - If you created a Pages project, create a new Workers project instead
+   - Workers projects use `wrangler.toml`, Pages use different configuration
+
+5. **GitHub Actions troubleshooting**:
+   - Check the workflow logs in the Actions tab
+   - The "Verify wrangler.toml exists" step will show if the file is missing
+   - Ensure `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` secrets are set
 
 ### Module Resolution Issues
 
