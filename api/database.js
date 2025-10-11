@@ -1,16 +1,14 @@
 const admin = require('firebase-admin');
 
-// Initialize Firebase Admin with explicit credentials (same as debug endpoint)
+// Initialize Firebase Admin with explicit credentials
 if (!admin.apps.length) {
   try {
     console.log('🔑 Initializing Firebase Admin with explicit credentials...');
     
-    // Check for credentials
     if (!process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
       throw new Error('GOOGLE_APPLICATION_CREDENTIALS_JSON environment variable is required');
     }
     
-    // Parse and use explicit credentials (same method that works in debug)
     const serviceAccount = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
     const credential = admin.credential.cert(serviceAccount);
     
@@ -33,7 +31,26 @@ function generateReferralCode() {
   return 'TSD' + Math.random().toString(36).substr(2, 6).toUpperCase();
 }
 
-// Add contest entry to database
+// Find entry by referral code
+async function findEntryByReferralCode(referralCode) {
+  try {
+    const snapshot = await db.collection('contest_entries')
+      .where('referralCode', '==', referralCode)
+      .limit(1)
+      .get();
+    
+    if (!snapshot.empty) {
+      const doc = snapshot.docs[0];
+      return { id: doc.id, ...doc.data() };
+    }
+    return null;
+  } catch (error) {
+    console.error('❌ Error finding entry by referral code:', error);
+    return null;
+  }
+}
+
+// Add contest entry with referral tracking
 async function addContestEntry(paymentData) {
   try {
     console.log('📝 Adding contest entry for:', paymentData.email);
@@ -62,7 +79,7 @@ async function addContestEntry(paymentData) {
     return { 
       ...entry, 
       id: docRef.id,
-      referralLink: `https://thesportsdugout.com/ref/${referralCode}`
+      referralLink: `https://thesportsdugout.com/api/referral?code=${referralCode}`
     };
   } catch (error) {
     console.error('❌ Error adding contest entry:', error);
@@ -73,6 +90,8 @@ async function addContestEntry(paymentData) {
 // Increment referral count
 async function incrementReferralCount(referralCode) {
   try {
+    console.log('🔗 Incrementing referrals for code:', referralCode);
+    
     const snapshot = await db.collection('contest_entries')
       .where('referralCode', '==', referralCode)
       .limit(1)
@@ -80,14 +99,17 @@ async function incrementReferralCount(referralCode) {
     
     if (!snapshot.empty) {
       const doc = snapshot.docs[0];
+      const currentReferrals = doc.data().referrals || 0;
+      
       await doc.ref.update({
         referrals: admin.firestore.FieldValue.increment(1),
         lastUpdated: admin.firestore.FieldValue.serverTimestamp()
       });
       
-      const newCount = (doc.data().referrals || 0) + 1;
+      const newCount = currentReferrals + 1;
       console.log('✅ Referral count updated:', referralCode, 'now has', newCount);
       
+      // Check for winner at 1000 referrals
       if (newCount >= 1000) {
         await markAsWinner(doc.id);
       }
@@ -144,7 +166,7 @@ async function getContestStats() {
     return stats;
   } catch (error) {
     console.error('❌ Error getting contest stats:', error);
-    throw error; // Let the caller handle fallback
+    throw error;
   }
 }
 
@@ -185,25 +207,6 @@ async function isEmailAlreadyEntered(email) {
   } catch (error) {
     console.error('❌ Error checking email:', error);
     return false;
-  }
-}
-
-// Find entry by referral code
-async function findEntryByReferralCode(referralCode) {
-  try {
-    const snapshot = await db.collection('contest_entries')
-      .where('referralCode', '==', referralCode)
-      .limit(1)
-      .get();
-    
-    if (!snapshot.empty) {
-      const doc = snapshot.docs[0];
-      return { id: doc.id, ...doc.data() };
-    }
-    return null;
-  } catch (error) {
-    console.error('❌ Error finding entry by referral code:', error);
-    return null;
   }
 }
 
