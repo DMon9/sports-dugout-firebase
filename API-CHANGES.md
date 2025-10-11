@@ -1,7 +1,7 @@
 # API Endpoints and Database Integration - Changes
 
 ## Overview
-This document describes the changes made to fix API endpoints for stats and leaderboard, and to enable UI auto-update upon contest entry.
+This document describes the changes made to fix API endpoints for stats and leaderboard, enable UI auto-update upon contest entry, and provide full referral support.
 
 ## Files Created
 
@@ -25,15 +25,31 @@ This document describes the changes made to fix API endpoints for stats and lead
   - Parameters: `email` - email address to check
   - Returns: boolean
 
+- `incrementReferralCount(referralCode)` - Increments referral count for a referrer
+  - Parameters: `referralCode` - the referral code to increment
+  - Returns: new count number
+  - Automatically marks as winner when reaching 1000 referrals
+
+- `findEntryByReferralCode(referralCode)` - Finds contest entry by referral code
+  - Parameters: `referralCode` - the referral code to look up
+  - Returns: entry object with id and data, or null if not found
+
+- `markAsWinner(entryId)` - Marks a contest entry as winner
+  - Parameters: `entryId` - database document ID
+  - Updates status to 'winner' and adds wonAt timestamp
+
 ## Files Modified
 
 ### `/api/index.js`
 **Changes**:
-- Fixed circular dependency by importing from `./db-functions` instead of `./database`
+- Fixed circular dependency by importing from `./database`
 - Maintains payment intent creation and contest entry confirmation flow
 - Supports two-step payment process:
-  1. Create payment intent
+  1. Create payment intent with optional `referredBy` field
   2. Confirm payment and add to database via `confirm_payment` flag
+- Added new `validate_referral` endpoint for referral code validation
+- Updated to version 3.3.0 with full referral support
+- Added features list in health check response
 
 ### `/api/database.js`
 **Changes**:
@@ -99,13 +115,36 @@ Returns top referrers
 }
 ```
 
+### GET `/api?action=validate_referral&code=TSD123ABC`
+Validates a referral code before payment
+```json
+{
+  "success": true,
+  "valid": true,
+  "referrerEmail": "tes***",
+  "referrals": 5,
+  "source": "database"
+}
+```
+
+Invalid code response:
+```json
+{
+  "success": true,
+  "valid": false,
+  "message": "Referral code not found",
+  "source": "database"
+}
+```
+
 ### POST `/api`
 **Create Payment Intent**
 ```json
 {
   "amount": 1000,
   "currency": "usd",
-  "email": "user@example.com"
+  "email": "user@example.com",
+  "referredBy": "TSD123ABC"
 }
 ```
 
@@ -115,7 +154,8 @@ Returns top referrers
   "confirm_payment": true,
   "payment_intent_id": "pi_xxx",
   "email": "user@example.com",
-  "amount": 1000
+  "amount": 1000,
+  "referredBy": "TSD123ABC"
 }
 ```
 
@@ -131,12 +171,14 @@ Response:
 
 ## Complete Payment Flow
 
-1. **User enters email and amount** → Frontend calls `POST /api` with payment details
-2. **Server creates Stripe payment intent** → Returns `client_secret`
+1. **User enters email and amount** → Frontend calls `POST /api` with payment details (optionally including `referredBy` code)
+2. **Server creates Stripe payment intent** → Returns `client_secret` (stores referral code in metadata)
 3. **Frontend confirms with Stripe** → Stripe confirms payment
-4. **Frontend confirms with API** → Calls `POST /api` with `confirm_payment: true`
-5. **Server adds to database** → Creates contest entry with referral code
-6. **UI refreshes** → Stats and leaderboard update automatically (1s, 2s, 3s delays)
+4. **Frontend confirms with API** → Calls `POST /api` with `confirm_payment: true` and `referredBy` code
+5. **Server adds to database** → Creates contest entry with unique referral code
+6. **Server increments referrer count** → If `referredBy` was provided, increments that referrer's count
+7. **Auto-winner detection** → If referrer reaches 1000 referrals, automatically marked as winner
+8. **UI refreshes** → Stats and leaderboard update automatically (1s, 2s, 3s delays)
 
 ## Testing
 
@@ -168,6 +210,39 @@ The system gracefully handles missing configuration:
 - Without Firebase: Returns mock data with `source: 'mock_data'`
 - Without Stripe: Returns appropriate error messages
 
+## Referral System Features
+
+The system now includes comprehensive referral support:
+
+### Referral Code Generation
+- Every contest entry automatically receives a unique referral code (format: TSD + 6 random alphanumeric chars)
+- Referral link format: `https://thesportsdugout.com/api/referral?code=TSD123ABC`
+
+### Referral Tracking
+- New users can include `referredBy` field when signing up
+- System automatically increments referrer's count when referred user completes payment
+- Referral counts are tracked with timestamps for audit trail
+
+### Winner Detection
+- System automatically detects when a user reaches 1000 referrals
+- Entry is marked as 'winner' with `wonAt` timestamp
+- Winner detection happens during referral count increment
+
+### Referral Validation
+- Frontend can validate referral codes before payment via `/api?action=validate_referral&code=XXX`
+- Returns referrer information (masked email, current referral count)
+- Gracefully handles invalid codes
+
+### Database Schema
+Each contest entry includes:
+- `referralCode` - unique code for this user
+- `referralLink` - full URL for sharing
+- `referredBy` - code of who referred this user (null if direct signup)
+- `referrals` - count of successful referrals
+- `status` - 'active' or 'winner'
+- `wonAt` - timestamp when reached 1000 referrals (if winner)
+- `lastUpdated` - timestamp of last referral count update
+
 ## Notes
 
 - The system is designed to work in both test and production modes
@@ -175,3 +250,4 @@ The system gracefully handles missing configuration:
 - All endpoints include proper CORS headers
 - Payment confirmation is idempotent (safe to retry)
 - Referral counting is automatic when `referredBy` is provided
+- Referral validation is non-blocking (failures don't prevent payment)
