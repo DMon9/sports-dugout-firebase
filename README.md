@@ -40,7 +40,8 @@ npm run deploy:development
 
 ## Documentation
 
-- **[CLOUDFLARE-DEPLOYMENT.md](CLOUDFLARE-DEPLOYMENT.md)** - Complete deployment guide and migration instructions
+- **[MIGRATION-SUMMARY.md](MIGRATION-SUMMARY.md)** - ⭐ Migration overview and quick start
+- **[CLOUDFLARE-DEPLOYMENT.md](CLOUDFLARE-DEPLOYMENT.md)** - Complete deployment guide and troubleshooting
 - **[API-DOCUMENTATION.md](API-DOCUMENTATION.md)** - API reference with all endpoints
 - **[USAGE-EXAMPLES.md](USAGE-EXAMPLES.md)** - Frontend integration examples
 - **[IMPLEMENTATION-GUIDE.md](IMPLEMENTATION-GUIDE.md)** - Architecture and technical details

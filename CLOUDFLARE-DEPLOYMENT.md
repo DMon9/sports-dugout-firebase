@@ -147,13 +147,34 @@ All existing API endpoints remain the same:
 
 ## Testing
 
-### Test Health Endpoint
+### Automated Verification
+
+Use the included verification script to test all endpoints:
+
+```bash
+# Test local development
+npm run verify
+
+# Test deployed worker (replace with your URL)
+npm run verify https://sports-dugout-firebase.your-subdomain.workers.dev
+```
+
+The script will test:
+- Health check endpoint
+- Stats endpoint
+- Sports API
+- CORS headers
+- Response validation
+
+### Manual Testing
+
+#### Test Health Endpoint
 
 ```bash
 curl https://sports-dugout-firebase.your-subdomain.workers.dev/api
 ```
 
-### Test with Authentication
+#### Test with Authentication
 
 ```bash
 curl -X POST https://sports-dugout-firebase.your-subdomain.workers.dev/api/users?action=login \
