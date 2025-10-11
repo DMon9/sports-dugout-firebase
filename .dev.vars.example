@@ -1,0 +1,16 @@
+# Cloudflare Workers Development Environment Variables
+# Copy this file to .dev.vars and fill in your actual values
+# Never commit .dev.vars to version control!
+
+# JWT Configuration (required)
+JWT_SECRET=your-development-secret-key-change-this
+
+# JWT Expiration (optional, default: 7d)
+JWT_EXPIRES_IN=7d
+
+# Stripe Configuration (required)
+STRIPE_SECRET_KEY=sk_test_your_test_key_here
+
+# Firebase Configuration (required)
+FIREBASE_PROJECT_ID=your-project-id
+GOOGLE_APPLICATION_CREDENTIALS_JSON={"type":"service_account","project_id":"your-project-id","private_key_id":"...","private_key":"-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n","client_email":"...","client_id":"...","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://oauth2.googleapis.com/token","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs","client_x509_cert_url":"..."}

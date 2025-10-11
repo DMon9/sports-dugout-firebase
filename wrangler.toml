@@ -1,0 +1,26 @@
+name = "sports-dugout-firebase"
+main = "src/index.js"
+compatibility_date = "2024-10-11"
+
+# Enable Node.js compatibility for existing packages
+node_compat = true
+
+[build]
+command = ""
+
+# Environment variables (set these in Cloudflare dashboard or via wrangler secret)
+# JWT_SECRET
+# STRIPE_SECRET_KEY
+# GOOGLE_APPLICATION_CREDENTIALS_JSON
+# FIREBASE_PROJECT_ID
+# JWT_EXPIRES_IN
+
+# Development configuration
+[env.development]
+name = "sports-dugout-firebase-dev"
+vars = { ENVIRONMENT = "development" }
+
+# Production configuration
+[env.production]
+name = "sports-dugout-firebase"
+vars = { ENVIRONMENT = "production" }
