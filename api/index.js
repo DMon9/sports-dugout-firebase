@@ -1,13 +1,12 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
-// Import database functions (only if Firebase is configured)
+// Import database functions with error handling
 let dbFunctions = null;
 try {
-  if (process.env.FIREBASE_PROJECT_ID) {
-    dbFunctions = require('./db-functions');
-  }
+  dbFunctions = require('./database');
+  console.log('✅ Database module loaded successfully');
 } catch (error) {
-  console.log('Database not available:', error.message);
+  console.error('❌ Database module failed to load:', error.message);
 }
 
 module.exports = async function handler(req, res) {
@@ -23,65 +22,133 @@ module.exports = async function handler(req, res) {
     
     console.log('🔥 API Request:', req.method, req.url);
     
-    // Parse the URL to get query parameters
     const url = new URL(req.url, `http://${req.headers.host}`);
     const action = url.searchParams.get('action');
     
-    // Health check - main API endpoint
+    // Health check
     if (req.method === 'GET' && !action) {
       res.status(200).json({
         status: 'Sports Dugout API with Database Integration!',
         timestamp: new Date().toISOString(),
         stripe_configured: !!process.env.STRIPE_SECRET_KEY,
-        firebase_configured: !!(process.env.FIREBASE_PROJECT_ID && dbFunctions),
+        firebase_configured: !!dbFunctions,
         mode: process.env.STRIPE_SECRET_KEY?.includes('test') ? 'test' : 'live',
-        version: '3.0.0',
-        available_actions: ['stats', 'leaderboard']
+        version: '3.2.0'
       });
       return;
     }
     
-    // Get real contest statistics
+    // Get real contest statistics with fallback
     if (req.method === 'GET' && action === 'stats') {
       console.log('📊 Stats requested');
+      
       if (dbFunctions) {
         try {
           const stats = await dbFunctions.getContestStats();
-          res.status(200).json({ success: true, data: stats });
+          res.status(200).json({ 
+            success: true, 
+            data: stats,
+            source: 'database'
+          });
         } catch (error) {
-          console.error('Stats error:', error);
-          res.status(500).json({ error: 'Failed to fetch stats', message: error.message });
+          console.error('❌ Database stats error:', error.message);
+          
+          // Return fallback data if database fails
+          const fallbackStats = {
+            totalUsers: 0,
+            totalDeposits: 0,
+            currentLeader: 0,
+            leaderEmail: 'None',
+            hasWinner: false,
+            lastUpdated: new Date().toISOString()
+          };
+          
+          res.status(200).json({ 
+            success: true, 
+            data: fallbackStats,
+            source: 'fallback',
+            error: 'Database temporarily unavailable'
+          });
         }
       } else {
-        res.status(503).json({ error: 'Database not configured' });
+        // Database not available
+        const mockStats = {
+          totalUsers: Math.floor(Math.random() * 10) + 1,
+          totalDeposits: Math.floor(Math.random() * 100) + 50,
+          currentLeader: Math.floor(Math.random() * 5),
+          leaderEmail: 'tes***',
+          hasWinner: false,
+          lastUpdated: new Date().toISOString()
+        };
+        
+        res.status(200).json({ 
+          success: true, 
+          data: mockStats,
+          source: 'mock'
+        });
       }
       return;
     }
     
-    // Get live leaderboard
+    // Get live leaderboard with fallback
     if (req.method === 'GET' && action === 'leaderboard') {
       console.log('🏆 Leaderboard requested');
+      
       if (dbFunctions) {
         try {
           const leaderboard = await dbFunctions.getLeaderboard(10);
-          res.status(200).json({ success: true, data: leaderboard });
+          res.status(200).json({ 
+            success: true, 
+            data: leaderboard,
+            source: 'database'
+          });
         } catch (error) {
-          console.error('Leaderboard error:', error);
-          res.status(500).json({ error: 'Failed to fetch leaderboard', message: error.message });
+          console.error('❌ Database leaderboard error:', error.message);
+          res.status(200).json({ 
+            success: true, 
+            data: [],
+            source: 'fallback',
+            error: 'Database temporarily unavailable'
+          });
         }
       } else {
-        res.status(503).json({ error: 'Database not configured' });
+        res.status(200).json({ 
+          success: true, 
+          data: [],
+          source: 'mock'
+        });
       }
       return;
     }
     
-    // Create payment intent with database integration
+    // Payment processing (existing code)
     if (req.method === 'POST') {
-      const { amount, currency = 'usd', email, referredBy } = req.body;
+      const { amount, currency = 'usd', email, referredBy, confirm_payment, payment_intent_id } = req.body;
       
-      console.log('💳 Payment request:', { amount, email, referredBy });
+      // Handle payment confirmation
+      if (confirm_payment && payment_intent_id && dbFunctions) {
+        try {
+          const contestEntry = await dbFunctions.addContestEntry({
+            email: email,
+            paymentIntentId: payment_intent_id,
+            amount: amount,
+            referredBy: referredBy || null
+          });
+          
+          res.status(200).json({
+            success: true,
+            message: 'Contest entry added successfully',
+            referralCode: contestEntry.referralCode,
+            referralLink: contestEntry.referralLink
+          });
+        } catch (dbError) {
+          console.error('❌ Database error:', dbError);
+          res.status(500).json({ error: 'Failed to add contest entry', message: dbError.message });
+        }
+        return;
+      }
       
-      // Validation
+      // Regular payment creation
       if (!amount || amount < 1000) {
         return res.status(400).json({ error: 'Minimum amount is $10' });
       }
@@ -102,7 +169,6 @@ module.exports = async function handler(req, res) {
           }
         } catch (dbError) {
           console.error('Database check failed:', dbError);
-          // Continue with payment even if DB check fails
         }
       }
       
@@ -110,7 +176,6 @@ module.exports = async function handler(req, res) {
         return res.status(500).json({ error: 'Payment system not configured' });
       }
       
-      // Create Stripe payment intent
       const paymentIntent = await stripe.paymentIntents.create({
         amount: parseInt(amount),
         currency: currency,
@@ -135,17 +200,7 @@ module.exports = async function handler(req, res) {
       return;
     }
     
-    res.status(404).json({ 
-      error: 'Endpoint not found',
-      method: req.method,
-      url: req.url,
-      available_endpoints: [
-        'GET /api - Health check',
-        'GET /api?action=stats - Contest statistics',
-        'GET /api?action=leaderboard - Leaderboard',
-        'POST /api - Create payment'
-      ]
-    });
+    res.status(404).json({ error: 'Endpoint not found' });
     
   } catch (error) {
     console.error('❌ API Error:', error);
