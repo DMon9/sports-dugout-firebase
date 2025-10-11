@@ -332,6 +332,7 @@
             const button = document.getElementById('processDeposit');
             const amount = parseFloat(document.getElementById('customAmount').value);
             const email = document.getElementById('signupEmail').value;
+            const referralCode = localStorage.getItem('referralCode'); // Get stored referral code
             
             if (!email || amount < 10 || !cardElement) {
                 alert('Please fill in all fields correctly');
@@ -342,7 +343,7 @@
             button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>PROCESSING...';
             
             try {
-                console.log('💳 Creating payment intent...');
+                console.log('💳 Creating payment intent with referral:', referralCode);
                 
                 // Step 1: Create payment intent
                 const response = await fetch('/api', {
@@ -351,7 +352,8 @@
                     body: JSON.stringify({
                         amount: Math.round(amount * 100),
                         currency: 'usd',
-                        email: email
+                        email: email,
+                        referredBy: referralCode // Include referral code
                     })
                 });
                 
@@ -386,29 +388,30 @@
                             confirm_payment: true,
                             payment_intent_id: paymentIntent.id,
                             email: email,
-                            amount: Math.round(amount * 100)
+                            amount: Math.round(amount * 100),
+                            referredBy: referralCode // Include referral code in confirmation
                         })
                     });
                     
-                    const confirmData = await confirmResponse.json();
-                    
-                    if (confirmResponse.ok && confirmData.success) {
-                        console.log('✅ Contest entry added:', confirmData.referralCode);
+                    if (confirmResponse.ok) {
+                        const confirmData = await confirmResponse.json();
+                        console.log('✅ Contest entry added:', confirmData.referralCode || 'success');
                         
-                        // Show success with real referral code
-                        showSuccess(confirmData.referralLink || confirmData.referralCode);
+                        // Clear referral code after successful use
+                        localStorage.removeItem('referralCode');
                         
-                        // Refresh stats immediately and again after a delay
-                        console.log('🔄 Refreshing contest stats...');
-                        setTimeout(updateRealStats, 1000);  // 1 second delay
-                        setTimeout(updateRealStats, 3000);  // 3 second delay
-                        setTimeout(fetchLeaderboard, 2000); // 2 second delay
+                        // Show success with real referral code if available
+                        showSuccess(confirmData.referralLink);
                     } else {
-                        console.error('❌ Failed to add contest entry:', confirmData.error);
-                        // Still show success since payment worked
+                        console.log('⚠️ Database entry may have failed, but payment succeeded');
                         showSuccess();
-                        setTimeout(updateRealStats, 2000);
                     }
+                    
+                    // Refresh stats
+                    setTimeout(updateRealStats, 1000);
+                    setTimeout(updateRealStats, 3000);
+                    setTimeout(updateRealStats, 5000);
+                    setTimeout(fetchLeaderboard, 2000);
                 }
                 
             } catch (error) {
@@ -547,11 +550,38 @@
             }, 30000);
         }
 
-        // Initialize live updates when page loads
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', startLiveUpdates);
-        } else {
+        // Check for referral parameters on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const referralCode = urlParams.get('ref') || localStorage.getItem('referralCode');
+            const shouldSignup = urlParams.get('signup');
+            
+            if (referralCode) {
+                console.log('🔗 Referral code detected:', referralCode);
+                localStorage.setItem('referralCode', referralCode);
+                
+                // Show referral banner
+                showReferralBanner(referralCode);
+                
+                // Auto-open signup if requested
+                if (shouldSignup === 'true') {
+                    setTimeout(openSignup, 1000);
+                }
+            }
+            
+            // Start live updates
             startLiveUpdates();
+        });
+
+        // Show referral banner
+        function showReferralBanner(referralCode) {
+            const banner = document.createElement('div');
+            banner.className = 'fixed top-0 left-0 right-0 bg-gradient-to-r from-blue-500 to-purple-600 text-white text-center py-3 font-bold text-sm z-50';
+            banner.innerHTML = `
+                🎉 You were referred by ${referralCode}! Both of you get credit when you join! 
+                <button onclick="this.parentElement.remove()" class="ml-4 text-white/80 hover:text-white">✕</button>
+            `;
+            document.body.appendChild(banner);
         }
 
         console.log('🚀 Database integration loaded - showing REAL contest data!');
