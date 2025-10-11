@@ -2,7 +2,10 @@
   "name": "sports-dugout-contest",
   "version": "1.0.0",
   "dependencies": {
-    "stripe": "^14.10.0",
-    "firebase-admin": "^12.0.0"
+    "axios": "^1.12.2",
+    "bcryptjs": "^3.0.2",
+    "firebase-admin": "^12.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "stripe": "^14.10.0"
   }
 }

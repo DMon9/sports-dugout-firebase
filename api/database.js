@@ -62,6 +62,7 @@ async function addContestEntry(paymentData) {
       amount: paymentData.amount,
       referralCode: referralCode,
       referredBy: paymentData.referredBy || null,
+      userId: paymentData.userId || null, // Support linking to user account
       referrals: 0,
       status: 'active',
       created: admin.firestore.FieldValue.serverTimestamp(),
