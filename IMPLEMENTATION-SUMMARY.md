@@ -195,13 +195,19 @@ $ node test-api.js
 
 ## File Structure Changes
 
+> **Update**: Utility modules have been moved to `/lib/` directory to comply with Vercel's 12 serverless function limit. See [VERCEL-FIX.md](./VERCEL-FIX.md).
+
 ```
 api/
-├── db-functions.js         [NEW] Firebase database operations
-├── index.js                [MODIFIED] Import from db-functions
-├── database.js             [MODIFIED] Import from db-functions
-├── stats.js                [MODIFIED] Use real database data
-├── contest.js              [MODIFIED] Fix module exports
+├── index.js                [MODIFIED] Import from ../lib/database
+├── stats.js                [MODIFIED] Use real database data, import from ../lib/database
+├── contest.js              [MODIFIED] Fix module exports, import from ../lib/db-functions
+├── referral.js             [MODIFIED] Import from ../lib/database
+└── ...
+
+lib/                        [NEW] Utility modules (not serverless functions)
+├── db-functions.js         [MOVED] Firebase database operations
+├── database.js             [MOVED] Database helper functions
 └── ...
 
 public/

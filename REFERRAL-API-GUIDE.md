@@ -154,7 +154,7 @@ localStorage.removeItem('referralCode');
 
 ## Database Functions
 
-All these functions are available in both `api/database.js` and `api/db-functions.js`:
+All these functions are available in both `lib/database.js` and `lib/db-functions.js` (moved from `/api/` to comply with Vercel limits):
 
 ### findEntryByReferralCode(referralCode)
 Find a contest entry by its referral code.

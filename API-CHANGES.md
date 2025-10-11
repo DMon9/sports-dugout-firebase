@@ -1,11 +1,13 @@
 # API Endpoints and Database Integration - Changes
 
+> **Note**: As of the latest update, utility modules have been moved from `/api/` to `/lib/` to comply with Vercel's serverless function limits. See [VERCEL-FIX.md](./VERCEL-FIX.md) for details.
+
 ## Overview
 This document describes the changes made to fix API endpoints for stats and leaderboard, enable UI auto-update upon contest entry, and provide full referral support.
 
 ## Files Created
 
-### `/api/db-functions.js`
+### `/lib/db-functions.js` (formerly `/api/db-functions.js`)
 **Purpose**: Firebase database helper functions for contest management
 
 **Exported Functions**:
@@ -198,7 +200,7 @@ This validates:
 
 **Before**: `api/index.js` and `api/database.js` both tried to `require('./database')`, causing circular dependency
 
-**After**: Created separate `api/db-functions.js` module containing Firebase functions, which is imported by all API files
+**After**: Created separate `lib/db-functions.js` module containing Firebase functions, which is imported by all API files from `../lib/db-functions`
 
 ## Environment Requirements
 
